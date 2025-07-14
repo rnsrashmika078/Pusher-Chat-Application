@@ -20,7 +20,7 @@ const NavBar = () => {
   };
   return (
     // 4rem = 64px = 16 tailwind points
-    <div className="z-[9999] h-[4rem] flex justify-between p-5 sticky top-0  select-none shadow-2xs bg-[var(--navbar)]">
+    <div className=" z-[9999] h-[4rem] flex justify-between p-5 sticky top-0  select-none shadow-2xs bg-[var(--navbar)]">
       <h1 className="text-2xl">AI</h1>
       <div className="hidden sm:flex justify-between gap-5 items-center">
         {navitems.map((item, index) => (

@@ -18,7 +18,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const Button = ({
-  name = "Click me",
+  name,
   variant = "default",
   size = "md",
   radius = "xs",

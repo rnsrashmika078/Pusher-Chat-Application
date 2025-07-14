@@ -6,6 +6,7 @@ import SignOutButton_ClientSide from "@/src/lib/Components/Basic/SignOutButton_C
 import PusherListenerPrivate from "@/src/compnents/Chat/Private/PusherListenerPrivate";
 import PusherListenerPresence from "@/src/compnents/Chat/Presence/PusherListenerPresence";
 import Sonner from "@/src/compnents/Sonner/Sonner";
+import Chat from "@/src/compnents/Chat/Chat";
 
 // Mock function to get all users (replace with your actual implementation)
 export default async function Home() {
@@ -17,9 +18,8 @@ export default async function Home() {
   }
 
   return (
-    <div className="p-5 max-w-2xl mx-auto">
-      {/* <Sonner message={"HI THERE"}/> */}
-      <PusherListenerPrivate user_id={session.user._id} />
+    <div>
+      {/* <PusherListenerPrivate user_id={session.user._id} />
       <SignOutButton_ClientSide />
       <h1 className="text-2xl font-bold mb-4">
         Welcome, {session.user.firstname} {session.user.lastname}
@@ -41,7 +41,9 @@ export default async function Home() {
               <SendRequestButton targetId={user._id} />
             </li>
           ))}
-      </ul>
+      </ul> */}
+      <Chat />
+      {/* <Email /> */}
     </div>
   );
 }

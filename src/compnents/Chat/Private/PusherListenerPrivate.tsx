@@ -50,7 +50,6 @@ export default function PusherListenerPrivate({
     });
 
     return () => {
-      console.log(`Unsubscribing from private-user-${user_id}`);
       pusher.unsubscribe(`private-user-${user_id}`);
     };
   }, [user_id]);

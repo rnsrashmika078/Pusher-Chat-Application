@@ -44,7 +44,6 @@ const EmailLayout: React.FC<EmailProps> = ({ emails }) => {
     }
   }, []);
 
-  console.log("EMAILS", emails && emails);
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (width > 768) {
