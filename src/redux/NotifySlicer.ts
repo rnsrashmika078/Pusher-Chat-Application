@@ -13,7 +13,8 @@ interface Notify {
 }
 
 interface SimpleMessage {
-  simpleMessage: string | null;
+  message: string;
+  id: number;
 }
 
 const initialState: Params = {
@@ -22,14 +23,17 @@ const initialState: Params = {
 };
 
 const nofifySlicer = createSlice({
-  name: "NofifySlicer",
+  name: "nofifySlicer",
   initialState,
-  
+
   reducers: {
     setNotify: (state, action: PayloadAction<Notify>) => {
       state.notify = action.payload;
     },
-    setSimpleNotification: (state, action: PayloadAction<SimpleMessage>) => {
+    setSimpleNotification: (
+      state,
+      action: PayloadAction<SimpleMessage | null>
+    ) => {
       state.simpleMessage = action.payload;
     },
   },

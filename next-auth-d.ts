@@ -1,4 +1,4 @@
-import { DefaultSession,  } from "next-auth";
+import { DefaultSession } from "next-auth";
 // DefaultJWT
 declare module "next-auth" {
   interface Session {

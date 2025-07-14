@@ -37,9 +37,9 @@ const MobileView = ({ toggle }: { toggle: boolean }) => {
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    className="space-y-3"
+                    className="space-y-3 -z-50"
                 >
-                    <div className="flex justify-between gap-5 items-center ">
+                    <div className=" flex justify-between gap-5 items-center ">
                         {navitems.map((item, index) => (
                             <motion.div
                                 variants={itemVariants}
