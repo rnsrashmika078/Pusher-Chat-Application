@@ -75,7 +75,6 @@ const Theme = () => {
     return (
         <div>
             <DropDown
-                changeType={false}
                 itemArray={["system", "dark", "light"]}
                 current={theme}
                 setIsSubMenuOpen={setIsSubMenuOpen}

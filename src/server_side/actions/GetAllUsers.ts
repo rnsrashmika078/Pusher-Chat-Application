@@ -2,7 +2,11 @@
 import connectDB from "../backend/lib/connectDB";
 import User from "../backend/models/User";
 export default async function GetAllUsers() {
-  await connectDB();
+  try {
+    await connectDB();
+  } catch (error) {
+    console.log("Your are offline", error);
+  }
   const allUsers = await User.find();
   const modified = allUsers.map((user) => ({
     ...user.toObject(),

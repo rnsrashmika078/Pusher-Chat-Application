@@ -2,7 +2,6 @@ export interface ImgProperty {
   secure_url: string;
   public_id: string;
 }
-
 export interface User {
   _id: string;
   firstname?: string | null;
@@ -13,7 +12,6 @@ export interface User {
   coverImage?: string | null;
   token?: string;
 }
-
 export interface EmailType {
   _id: string;
   from: string;
@@ -48,4 +46,12 @@ export interface Product {
 export interface LoadBody {
   loading: boolean;
   type: string;
+}
+
+export interface News {
+  id: number;
+  date: string;
+  heading: string;
+  content: string;
+  category: string;
 }

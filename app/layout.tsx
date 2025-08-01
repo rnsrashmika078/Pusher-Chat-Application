@@ -10,6 +10,7 @@ import "./globals.css";
 import ClientProvider from "@/src/redux/ClientProvider";
 import NavBar from "@/src/compnents/NavBar/NavBar";
 import Sonner from "@/src/compnents/Sonner/Sonner";
+import { SessionProvider } from "next-auth/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

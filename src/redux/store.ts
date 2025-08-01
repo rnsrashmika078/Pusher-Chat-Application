@@ -4,12 +4,13 @@ import setNotify from "./NotifySlicer";
 // import feedSlicer from "./FeedSlicer";
 import EmailSlicer from "./emailSlicer";
 import ChatSlicer from "./chatSlicer";
+import aiChatSlicer from "./aiChatSlicer";
 export const store = configureStore({
   reducer: {
     chat: ChatSlicer,
     inbox: EmailSlicer,
     notify: setNotify,
-    // feed: feedSlicer,
+    aiChat: aiChatSlicer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

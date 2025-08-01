@@ -1,0 +1,10 @@
+.child:nth-child(2n + 1) {
+  color: green;
+}
+
+.bg-image {
+  --bg-image: url("/noproduct.png");
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+}

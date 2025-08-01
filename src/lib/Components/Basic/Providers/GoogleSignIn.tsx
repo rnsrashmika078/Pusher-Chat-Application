@@ -5,7 +5,7 @@ import React from "react";
 const GoogleSignIn = ({ formtype }: { formtype: string }) => {
     return (
         <button
-            onClick={() => signIn("google", { callbackUrl: "/api/dashboard" })}
+            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
             className="flex items-center justify-center gap-2 w-full py-2 px-4 bg-white border border-gray-300 rounded-md shadow-sm hover:shadow-md transition"
         >
             <svg

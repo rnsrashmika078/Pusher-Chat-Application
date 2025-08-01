@@ -13,9 +13,13 @@ interface MessageBody {
   username: string;
   message: string;
 }
+interface MessageProps {
+  useFor: "AI" | "Chat";
+}
 
-const MessageArea = () => {
+const MessageArea = ({ useFor }: MessageProps) => {
   const chat = useSelector((store: ReduxtState) => store.chat);
+
   const username = "Rashmika";
   const [typeMessage, setTypeMessage] = useState<string>("");
   const [messages, setMessages] = useState<MessageBody[]>([]);
@@ -33,36 +37,52 @@ const MessageArea = () => {
     }
     setTypeMessage("");
   };
+
+  const aiChat = useSelector((store: ReduxtState) => store.aiChat.openChat);
+
   return (
     <div className="flex flex-col w-full h-full select-none">
       {/* Header */}
+
       <div className="flex justify-between items-center p-5 py-6 shadow-xs bg-white border-b border-gray-200 sticky  z-10">
         <div className="flex gap-3 items-center">
-          <Image
-            src="https://randomuser.me/api/portraits/men/27.jpg"
-            alt="Reviewer"
-            width={40}
-            height={40}
-            className="w-10 h-10 rounded-full object-cover"
-          />
-          <div>
-            <h1 className="font-bold">
-              {chat.chatWith?.firstname + " " + chat.chatWith?.lastname}
-            </h1>
-            <p className="text-sm text-gray-400">Last seen 3 hours ago</p>
+          {useFor === "Chat" && (
+            <Image
+              src="https://randomuser.me/api/portraits/men/27.jpg"
+              alt="Reviewer"
+              width={40}
+              height={40}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          )}
+          {useFor === "Chat" ? (
+            <div>
+              <h1 className="font-bold">
+                {chat.chatWith?.firstname + " " + chat.chatWith?.lastname}
+              </h1>
+              <p className="text-sm text-gray-400">Last seen 3 hours ago</p>
+            </div>
+          ) : (
+            <div>
+              <h1 className="font-bold">{aiChat?.title}</h1>
+              <p className="text-sm text-gray-400">Last seen 3 hours ago</p>
+            </div>
+          )}
+        </div>
+
+        {useFor === "Chat" && (
+          <div className="flex gap-5 text-sm text-gray-500">
+            <span>
+              <IoCall size={25} color="gray" />
+            </span>
+            <span>
+              <FaVideo size={25} color="gray" />
+            </span>
+            <span>
+              <IoMdMore size={25} color="gray" />
+            </span>
           </div>
-        </div>
-        <div className="flex gap-5 text-sm text-gray-500">
-          <span>
-            <IoCall size={25} color="gray" />
-          </span>
-          <span>
-            <FaVideo size={25} color="gray" />
-          </span>
-          <span>
-            <IoMdMore size={25} color="gray" />
-          </span>
-        </div>
+        )}
       </div>
 
       {/* Messages */}

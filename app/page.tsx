@@ -7,11 +7,12 @@ import PusherListenerPrivate from "@/src/compnents/Chat/Private/PusherListenerPr
 import PusherListenerPresence from "@/src/compnents/Chat/Presence/PusherListenerPresence";
 import Sonner from "@/src/compnents/Sonner/Sonner";
 import Chat from "@/src/compnents/Chat/Chat";
+import ProgressBar from "@/src/lib/Components/Basic/ProgressBar";
 
 // Mock function to get all users (replace with your actual implementation)
 export default async function Home() {
   const session = await getServerSession(authOptions);
-  const allUsers = await GetAllUsers();
+  // const allUsers = await GetAllUsers();
 
   if (!session) {
     return <div className="p-5">Please log in to view this page.</div>;
@@ -42,7 +43,7 @@ export default async function Home() {
             </li>
           ))}
       </ul> */}
-      <Chat />
+      {/* <Chat /> */}
       {/* <Email /> */}
     </div>
   );

@@ -27,7 +27,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
     }
 
-    const auth = pusher.authenticate(socket_id, channel_name, {
+    const auth = pusher.authorizeChannel(socket_id, channel_name, {
       user_id: session.user._id,
       user_info: { firstname: session.user.firstname },
     });

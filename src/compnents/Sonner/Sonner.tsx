@@ -14,7 +14,6 @@ const Sonner = () => {
   );
   useEffect(() => {
     if (!newMessage) return;
-
     setShow(true);
     const timer = setTimeout(() => setShow(false), 3000);
 

@@ -25,7 +25,7 @@ const MobileView = ({ toggle }: { toggle: boolean }) => {
         },
     };
     const itemVariants = {
-        hidden: { opacity: 0, y: -20 },
+        hidden: { opacity: 0, y: -50 },
         visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
         exit: { opacity: 0, y: 20, transition: { duration: 0.4 } },
     };
@@ -44,7 +44,7 @@ const MobileView = ({ toggle }: { toggle: boolean }) => {
                             <motion.div
                                 variants={itemVariants}
                                 key={index}
-                                className="text-gray-500 hover:cursor-pointer select-none hover:text-gray-300 transition-all duration-200"
+                                className="text-gray-500 hover:cursor-pointer select-none hover:text-gray-300"
                             >
                                 {item.item}
                             </motion.div>
