@@ -2,12 +2,13 @@
 import Theme from "@/src/lib/Components/Advanced/Theme/Theme";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
+import { GoBell } from "react-icons/go";
 
 const MobileView = ({ toggle }: { toggle: boolean }) => {
     const navitems = [
         { item: "Home" },
-        { item: "Dashboard" },
         { item: "Profile" },
+        { item: <GoBell size={20}/> },
         { item: <Theme /> },
     ];
     const containerVariants = {

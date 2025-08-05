@@ -20,6 +20,7 @@ export default async function Home() {
 
   return (
     <div>
+   
       {/* <PusherListenerPrivate user_id={session.user._id} />
       <SignOutButton_ClientSide />
       <h1 className="text-2xl font-bold mb-4">
@@ -27,7 +28,7 @@ export default async function Home() {
       </h1>
       <h2 className="text-lg mb-4">Your ID: {session.user._id}</h2>
       <h3 className="text-xl font-semibold mb-2">Users</h3>
-      <PusherListenerPresence user_id={session.user._id} />
+      
       <ul className="space-y-4">
         {allUsers
           .filter((user) => user._id !== session.user._id)

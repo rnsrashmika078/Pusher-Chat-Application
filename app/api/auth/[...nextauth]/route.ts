@@ -19,12 +19,17 @@ export const authOptions: AuthOptions = {
       },
       // @ts-ignore
       async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) return null;
-        const user = await UserSignIn({
-          username: credentials.username,
-          password: credentials.password,
-        });
-        return user || null;
+        try {
+          if (!credentials?.username || !credentials?.password) return null;
+          const user = await UserSignIn({
+            username: credentials.username,
+            password: credentials.password,
+          });
+          return user || null;
+        } catch (err) {
+          console.error("Authorize error:", err);
+          return null; // return null to avoid breaking JSON parse
+        }
       },
     }),
   ],
@@ -33,7 +38,7 @@ export const authOptions: AuthOptions = {
       if (account && user) {
         if (account.provider === "google") {
           const formData = new FormData();
-          formData.append("username", user.username || "");
+          formData.append("username", user.name || "");
           formData.append("firstname", user.name?.split(" ")[0] || "");
           formData.append("lastname", user.name?.split(" ")[1] || "");
           formData.append("email", user.email || "");
@@ -41,13 +46,13 @@ export const authOptions: AuthOptions = {
 
           const dbUser = await SignWithGoogle(formData); // 👈 await it!
 
-          token._id = dbUser?.user?._id;
-          token.firstname = dbUser?.user?.firstname;
-          token.lastname = dbUser?.user?.lastname;
-          token.username = dbUser?.user?.username;
-          token.email = dbUser?.user?.email;
-          token.profileImage = dbUser?.user?.profileImage;
-          token.coverImage = dbUser?.user?.coverImage;
+          token._id = dbUser?._id;
+          token.firstname = dbUser?.firstname;
+          token.lastname = dbUser?.lastname;
+          token.username = dbUser?.username;
+          token.email = dbUser?.email;
+          token.profileImage = dbUser?.profileImage;
+          token.coverImage = dbUser?.coverImage;
           token.token = account.access_token;
         } else {
           // Credentials login
@@ -66,7 +71,7 @@ export const authOptions: AuthOptions = {
 
       if (session.user) {
         session.user._id = typedToken._id || "";
-        session.user.username = typedToken.username || "";
+        // session.user.username = typedToken.username || "";
         session.user.firstname = typedToken.firstname || null;
         session.user.lastname = typedToken.lastname || null;
         session.user.email = typedToken.email || null;
@@ -78,7 +83,8 @@ export const authOptions: AuthOptions = {
     },
   },
   pages: {
-    signIn: "/api/auth/signup",
+    signIn: "/signs",
+    // signIn: "/dashboard",
     // signOut: "/auth/logout",
   },
   session: {

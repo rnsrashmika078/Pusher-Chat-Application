@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { CiMenuBurger } from "react-icons/ci";
 import MobileView from "./MobileView";
 import { AnimatePresence, motion } from "framer-motion";
-import useScreenSize from "@/src/hooks/ScreenSize";
+import useScreenSize from "@/src/hooks/useScreenSize";
+import { GoBell } from "react-icons/go";
 
 const NavBar = () => {
   const [toggle, setToggle] = useState<boolean>(false);
@@ -17,8 +18,8 @@ const NavBar = () => {
 
   const navitems = [
     { item: "Home" },
-    { item: "Dashboard" },
     { item: "Profile" },
+    { item: <GoBell size={20}/> },
     { item: <Theme /> },
   ];
   const itemVariants = {

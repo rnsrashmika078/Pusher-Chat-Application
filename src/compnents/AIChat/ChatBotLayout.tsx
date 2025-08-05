@@ -8,7 +8,7 @@ import { ReduxtState } from "@/src/redux/store";
 import MessageArea from "../Chat/MessageArea";
 import SidePanel from "../Chat/SidePanel";
 import AIChatListPanel from "./AIChatListPanel";
-import useScreenSize from "@/src/hooks/ScreenSize";
+import useScreenSize from "@/src/hooks/useScreenSize";
 
 interface EmailProps {
   emails: EmailType[];

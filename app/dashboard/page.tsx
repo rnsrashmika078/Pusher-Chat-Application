@@ -3,10 +3,6 @@ import React from "react";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 export default async function page() {
   const session = await getServerSession(authOptions);
-  return (
-    <div className="">
-      {/* <Chooser /> */}
-      {/* <Settings /> */}
-    </div>
-  );
+  console.log("session data", session);
+  return <div className="">{session?.user.name}</div>;
 }

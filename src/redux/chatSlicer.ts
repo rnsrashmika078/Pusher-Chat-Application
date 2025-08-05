@@ -30,6 +30,7 @@ const chatSlicer = createSlice({
     setWebSocket: (state, action: PayloadAction<WebSocket>) => {
       state.ws = action.payload;
     },
+    
   },
 });
 

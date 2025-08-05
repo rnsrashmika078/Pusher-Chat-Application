@@ -1,7 +1,7 @@
 import IconButton from "@/src/lib/Components/Basic/IconButton";
 import { setActiveTab } from "@/src/redux/chatSlicer";
 import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
-import React from "react";
+import React, { useState } from "react";
 import { BsBookmarkStar } from "react-icons/bs";
 import { FiPlus } from "react-icons/fi";
 import { GrSchedulePlay } from "react-icons/gr";
@@ -10,22 +10,35 @@ import { IoIosSettings } from "react-icons/io";
 import { MdOutlinePresentToAll } from "react-icons/md";
 import { RiDraftFill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
-
-const SidePanel = () => {
+import AddFriend from "../AddFriend/AddFriend";
+import { User } from "@/interface/Types";
+interface SideProps {
+  allUsers: User[];
+}
+const SidePanel: React.FC<SideProps> = ({ allUsers }) => {
   const activeTab = useSelector((store: ReduxtState) => store.chat.activeTab);
-  console.log(activeTab);
+  const [visibility, setVisibility] = useState<boolean>(false);
 
   const dispatch = useDispatch<ReduxDispatch>();
   return (
     <div className="select-none transition-all w-12 md:w-auto ">
-      <div className="hidden md:flex">
-        <IconButton name="Compose">
+      {visibility && (
+        <AddFriend allUsers={allUsers} setVisibility={setVisibility} />
+      )}
+      <div
+        className="hidden md:flex"
+        onClick={() => setVisibility((prev: boolean) => !prev)}
+      >
+        <IconButton name="Add Friend">
           <FiPlus size={20} />
         </IconButton>
       </div>
 
       <div className="flex md:hidden text-white bg-blue-500 my-5  p-1  w-7 mx-3  justify-center items-center rounded-full hover:curosor-pointer hover:bg-blue-400 transition-all">
-        <FiPlus size={20} />
+        <FiPlus
+          size={20}
+          onClick={() => setVisibility((prev: boolean) => !prev)}
+        />
       </div>
       <div className="text-white">
         {[

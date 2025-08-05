@@ -63,7 +63,7 @@ const SignOutButton_ClientSide = ({
         <button
             className={`${style}`}
             {...props}
-            onClick={() => signOut({ callbackUrl: "/api/auth/signs" })}
+            onClick={() => signOut({ callbackUrl: "/signs" })}
         >
             {name}
         </button>

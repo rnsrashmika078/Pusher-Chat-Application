@@ -31,3 +31,10 @@ export interface User {
   coverImage?: string | null;
   token?: string;
 }
+
+export interface FriendRequest {
+  from: string;
+  senderId: string;
+  message: string;
+  targetUserId?: string;
+}

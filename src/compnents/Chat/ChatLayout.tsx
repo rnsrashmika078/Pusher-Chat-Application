@@ -8,16 +8,19 @@ import MessageArea from "./MessageArea";
 import SidePanel from "./SidePanel";
 import ChatListPanel from "./ChatListPanel";
 import { useSession } from "next-auth/react";
+import ChatSettings from "./ChatSettings";
+import { User } from "@/interface/Types";
+import PusherListenerPrivate from "./Private/PusherListenerPrivate";
 
-interface EmailProps {
-  emails: EmailType[];
+interface LayoutProps {
+  allUsers: User[];
 }
-const ChatLayout: React.FC<EmailProps> = () => {
+const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
   const { data: session } = useSession();
   const [width, setWidth] = useState(0);
   const [toggle, setToggle] = useState<boolean>(false);
   const chat = useSelector((store: ReduxtState) => store.chat.chatWith);
-
+  const activeTab = useSelector((store: ReduxtState) => store.chat.activeTab);
   useEffect(() => {
     if (typeof window !== "undefined") {
       const handleResize = () => setWidth(window.innerWidth);
@@ -46,19 +49,31 @@ const ChatLayout: React.FC<EmailProps> = () => {
     runEffect();
   }, [chat, width]);
 
-
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden border-2 border-t-[var(--border)]  ">
       <div className="flex flex-1 bg-gray-800 overflow-hidden">
-        <SidePanel />
+        {/* @ts-ignore */}
+        <PusherListenerPrivate user_id={session?.user._id} />
+        <SidePanel allUsers={allUsers} />
         {/* This is the only scrollable section */}
-        <div
-          className={`overflow-x-hidden flex transition-all duration-100 ease-in-out
-    ${toggle ? "w-0" : "w-full md:w-1/2"}
-    bg-[var(--panel-bg-color)]   lg:flex-1  overflow-y-auto scrollbar-hidden  relative  border-r border-[var(--border)] rounded-l-4xl`}
-        >
-          <ChatListPanel toggle={toggle} />
-        </div>
+        {activeTab === "Settings" ? (
+          <div
+            className={`overflow-x-hidden flex transition-all duration-100 ease-in-out
+  ${toggle ? "w-0" : "w-full"}
+  bg-[var(--panel-bg-color)]    overflow-y-auto scrollbar-hidden  relative  border-r border-[var(--border)] rounded-l-4xl`}
+          >
+            <ChatSettings />
+          </div>
+        ) : (
+          <div
+            className={`overflow-x-hidden flex transition-all duration-100 ease-in-out
+    ${toggle ? "w-0" : "w-full md:w-1/2 lg:basis-[35%] xl:basis-[30%]  "}
+    bg-[var(--panel-bg-color)]    overflow-y-auto scrollbar-hidden  relative  border-r border-[var(--border)] rounded-l-4xl`}
+          >
+            <ChatListPanel toggle={toggle} allUsers={allUsers} />
+          </div>
+        )}
+
         <div
           className={`w-8 h-8  bg-black left-2 text-white rounded-full fixed flex justify-center items-center shadow-2xl lg:hidden bottom-2 transition-all duration-300 ease-out opacity-25 hover:opacity-100 ${
             toggle ? "" : ""
@@ -70,19 +85,21 @@ const ChatLayout: React.FC<EmailProps> = () => {
             onClick={() => setToggle((prev) => !prev)}
           />
         </div>
-        <div
-          className={`bg-[var(--panel-bg-color)] flex ${
-            toggle ? "flex-1" : "flex-2"
-          } h-[calc(100vh-4rem)]  overflow-y-auto w-full`}
-        >
-          {chat ? (
-            <MessageArea useFor="Chat" />
-          ) : (
-            <div className="text-2xl flex justify-center items-center m-auto">
-              Chat With your Friend
-            </div>
-          )}
-        </div>
+        {activeTab !== "Settings" && (
+          <div
+            className={`bg-[var(--panel-bg-color)] flex ${
+              toggle ? "flex-1" : "flex-2"
+            } h-[calc(100vh-4rem)]  overflow-y-auto w-full`}
+          >
+            {chat && !activeTab ? (
+              <MessageArea useFor="Chat" />
+            ) : (
+              <div className="text-2xl flex justify-center items-center m-auto">
+                Chat With your Friend
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

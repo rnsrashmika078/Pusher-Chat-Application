@@ -1,6 +1,14 @@
 "use client";
 
-export default function SendRequestButton({ targetId }: { targetId: string }) {
+import { ReactNode } from "react";
+
+export default function SendRequestButton({
+  targetId,
+  children,
+}: {
+  targetId: string;
+  children: ReactNode;
+}) {
   const sendRequest = async () => {
     try {
       const res = await fetch("/api/private-message", {
@@ -20,10 +28,11 @@ export default function SendRequestButton({ targetId }: { targetId: string }) {
   };
   return (
     <button
+      type="button"
       className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
       onClick={sendRequest}
     >
-      Send Request
+      {children || "Send Friend Request"}
     </button>
   );
 }

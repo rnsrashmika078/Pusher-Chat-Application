@@ -42,18 +42,26 @@ const SignForms: React.FC = () => {
         username: signInData.username,
         password: signInData.password,
         redirect: false,
-        // callbackUrl: "/api/dashboard",
+        // callbackUrl: "/dashboard",
       });
+      const id = Date.now();
       if (res?.ok) {
         dispatch(
           setSimpleNotification({
             message: "Successfully Logged in!",
-            id: Date.now(),
+            id: id,
           })
         );
         router.push(res.url || "/dashboard");
       } else {
-        setMessage("Invalid credentials.Please check the login credentials!");
+        const id = Date.now();
+        dispatch(
+          setSimpleNotification({
+            message: "Invalid credentials.Please check the login credentials!",
+            id: id,
+          })
+        );
+        // setMessage("Invalid credentials.Please check the login credentials!");
       }
       return new Promise((resolve) =>
         setTimeout(() => {
@@ -72,14 +80,12 @@ const SignForms: React.FC = () => {
       const result = await UserSignUp(formData);
       if (result) {
         if (result.status === 401) {
+          const id = Date.now();
           setMessage(result.message);
-          dispatch(
-            setSimpleNotification({ message: result.message, id: Date.now() })
-          );
+          dispatch(setSimpleNotification({ message: result.message, id: id }));
         } else {
-          dispatch(
-            setSimpleNotification({ message: result.message, id: Date.now() })
-          );
+          const id = Date.now();
+          dispatch(setSimpleNotification({ message: result.message, id: id }));
           setMessage(result.message);
           reset();
         }
@@ -127,7 +133,7 @@ const SignForms: React.FC = () => {
         exit="exit"
         className="mt-5 select-none flex border  border-[var(--border)] rounded-2xl justify-center w-11/12 sm:w-[500px] md:w-[500px] p-5 m-auto shadow-sm bg-[var(--card-background)]"
       >
-        <Sonner />
+        {/* <Sonner /> */}
         <div className="flex flex-col gap-1 w-full md:min-w-md">
           <form onSubmit={handleSubmit(onSubmit)}>
             <h1 className="font-bold text-center text-2xl">
