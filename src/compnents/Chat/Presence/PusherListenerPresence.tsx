@@ -1,6 +1,16 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Pusher from "pusher-js";
+import { Chat, Member } from "@/interface/Types";
+import {
+  joinedUser,
+  leftUser,
+  setLiveMessages,
+  setOnlineUsers,
+} from "@/src/redux/chatSlicer";
+import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { updateLastSeen } from "@/src/server_side/actions/UserLastSeenServerAction";
 // import Sonner from "../../Sonner/Sonner";
 
 type MessageType = {
@@ -10,17 +20,16 @@ type MessageType = {
   targetUserId: string;
 };
 
-type Member = {
-  id: string;
-  info: { firstname: string; lastname: string };
-};
-
 export default function PusherListenerPresence({
   user_id,
 }: {
   user_id: string | null;
 }) {
-  const [onlineUsers, setOnlineUsers] = useState<Member[]>([]);
+  // const [onlineUsers, setOnlineUsers] = useState<Member[]>([]);
+  const dispatch = useDispatch<ReduxDispatch>();
+  const onlineUsers = useSelector(
+    (store: ReduxtState) => store.chat.onlineUsers
+  );
 
   useEffect(() => {
     if (!user_id) {
@@ -33,9 +42,9 @@ export default function PusherListenerPresence({
       authEndpoint: "/api/pusher/auth",
     });
 
-    const channel = pusher.subscribe(`presence-users`);
-
-    channel.bind(
+    const presenceChannel = pusher.subscribe("presence-users");
+    const channel = pusher.subscribe(`presence-user-${user_id}`);
+    presenceChannel.bind(
       "pusher:subscription_succeeded",
       (members: { members: Record<string, Member["info"]> }) => {
         console.log("Subscribed to presence-users, members:", members);
@@ -45,48 +54,46 @@ export default function PusherListenerPresence({
             info,
           })
         );
-        setOnlineUsers(initialMembers);
+        dispatch(setOnlineUsers(initialMembers));
         console.log("Initial online users:", initialMembers);
       }
     );
 
-    channel.bind("pusher:member_added", (member: Member) => {
+    presenceChannel.bind("pusher:member_added", (member: Member) => {
       // console.log("Member added:", member);
       const memberjoined = `${member.info.firstname} joined!`;
-      // <Sonner message={memberjoined} />;
-      // alert(`Member Added: ${member.info.firstname} ${member.info.lastname}`);
-      setOnlineUsers((prev) => [...prev, member]);
+      console.log(memberjoined);
+      dispatch(joinedUser(member));
     });
 
-    channel.bind("pusher:member_removed", (member: Member) => {
+    presenceChannel.bind("pusher:member_removed", async (member: Member) => {
       const memberLeft = `${member.info.firstname} left!`;
-      // <Sonner message={memberLeft} />;
-      // alert(`Member Removed: ${member.info.firstname} ${member.info.lastname}`);
-      setOnlineUsers((prev) => prev.filter((m) => m.id !== member.id));
+      console.log(memberLeft);
+      dispatch(leftUser(member));
+      await updateLastSeen(member.id);
     });
 
     channel.bind("pusher:subscription_error", (error: MessageType) => {
       const errormessage = `Subscription error: ${error}`;
+      console.log(errormessage);
+
       // <Sonner message={errormessage} />;
     });
 
-    // channel.bind("friend-request", (data: MessageType) => {
-    //   console.log("Friend request received:", data);
-    //   alert(`🔔 Friend request from ${data.from}: ${data.message}`);
-    // });
+    channel.bind("chat-history", (data: Chat) => {
+      console.log("Friend request received:", data);
+      dispatch(setLiveMessages(data));
+      console.log("PUSHER MESSAGE ", data.message);
+    });
 
     return () => {
       console.log("Unsubscribing from presence-users");
-      pusher.unsubscribe("presence-users");
+      pusher.unsubscribe(`presence-user-${user_id}`);
       pusher.disconnect();
     };
-  }, [user_id]);
+  }, [dispatch, user_id]);
 
-  return (
-    <div>
-      {onlineUsers.map((user) => (
-        <li key={user.id}>{user.info.firstname}</li>
-      ))}
-    </div>
-  );
+  console.log("Online Users: ", onlineUsers);
+
+  return null;
 }

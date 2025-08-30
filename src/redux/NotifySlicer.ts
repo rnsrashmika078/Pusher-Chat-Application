@@ -3,9 +3,12 @@
 import { FriendRequest } from "@/interface/Types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 type MessageType = {
+  c_id: string;
   from: string;
   senderId: string;
   message: string;
+  status: string;
+  targetUserId: string;
 };
 
 interface Notify {
@@ -53,6 +56,11 @@ const nofifySlicer = createSlice({
     setRequestData: (state, action: PayloadAction<MessageType | null>) => {
       state.RequestData = action.payload;
     },
+    // removeFriendRequest: (state, action: PayloadAction<{ c_id: string }>) => {
+    //   state.friendRequest =
+    //     state.friendRequest &&
+    //     state.friendRequest.filter((req) => req.c_id !== action.payload.c_id);
+    // },
   },
 });
 
@@ -61,5 +69,6 @@ export const {
   setSimpleNotification,
   setFriendRequest,
   setRequestData,
+  // removeFriendRequest,
 } = nofifySlicer.actions;
 export default nofifySlicer.reducer;

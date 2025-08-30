@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import Pusher from "pusher";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
+import Message from "@/src/server_side/backend/models/Message";
+import Conversation from "@/src/server_side/backend/models/Conversation";
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID!,
@@ -13,18 +15,47 @@ const pusher = new Pusher({
 
 export async function POST(req: Request) {
   try {
-    const { message, targetUserId } = await req.json();
+    let saved = true;
+    const {
+      conversationId,
+      senderId,
+      recieverId,
+      message,
+      lastMessage,
+      status,
+      createdAt,
+    } = await req.json();
     const session = await getServerSession(authOptions);
-
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    await pusher.trigger(`presence-users`, "friend-request", {
-      from: session.user.firstname,
-      senderId: session.user._id,
+    const saveContact = await Conversation.find({
+      conversationId,
+      userid: senderId,
+    });
+    if (saveContact.length === 0) {
+      saved = false;
+    }
+    const newMessage = new Message({
+      conversationId,
+      senderId,
+      recieverId,
       message,
-      targetUserId,
+      lastMessage,
+      status,
+    });
+
+    await newMessage.save();
+    // 4️⃣ Trigger Pusher for real-time updates
+    await pusher.trigger(`presence-user-${recieverId}`, "chat-history", {
+      conversationId,
+      senderId,
+      recieverId,
+      message,
+      lastMessage,
+      status,
+      saved,
+      createdAt,
     });
 
     return NextResponse.json({ status: "ok" });

@@ -7,7 +7,7 @@ export default async function GetAllUsers() {
   } catch (error) {
     console.log("Your are offline", error);
   }
-  const allUsers = await User.find();
+  const allUsers = await User.find().select("-password");
   const modified = allUsers.map((user) => ({
     ...user.toObject(),
     _id: user._id.toString(),

@@ -2,25 +2,37 @@ import mongoose from "mongoose";
 
 const FriendSchema = new mongoose.Schema(
   {
-    from: {
+    userId: {
+      type: String,
+      required: false,
+    },
+    myId: {
       type: String,
       required: true,
     },
-    senderId: {
+    profileimage: {
+      type: String,
+      required: false,
+    },
+    username: {
       type: String,
       required: true,
     },
-    message: {
+    firstname: {
       type: String,
       required: true,
     },
-    targetUserId: {
+    lastname: {
+      type: String,
+      required: true,
+    },
+    lastMessage: {
       type: String,
       required: false,
     },
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt
+    timestamps: true, // ✅ this should be the *second argument*
   }
 );
 

@@ -27,8 +27,11 @@ const Button = ({
   ...props
 }: ButtonProps) => {
   const variants = {
-    default:
-      "bg-blue-600 text-white hover:bg-blue-700 hover:cursor-pointer hover:shadow-md transition",
+    default: `${
+      props.disabled
+        ? "bg-gray-300 text-white"
+        : "bg-blue-600 text-white hover:bg-blue-700"
+    } hover:cursor-pointer hover:shadow-md transition`,
     danger:
       "bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer hover:shadow-md transition",
     positive:

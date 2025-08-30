@@ -15,8 +15,10 @@ export default function SendRequestButton({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          c_id: targetId + targetId + new Date().getTime(),
           targetUserId: targetId,
-          message: "Hey, let's be friends!",
+          message: "🔔 New Friend request. You have friend request from ",
+          status: "pending",
         }),
       });
       if (!res.ok) {

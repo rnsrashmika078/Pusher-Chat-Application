@@ -92,6 +92,15 @@ li {
   background-size: 600% 600%;
   animation: gradientMove 8s ease infinite;
 }
+@keyframes gradientMove {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
 .gradient_animation {
   font-weight: 700;
   background: linear-gradient(45deg, #ff3366, #ff6b6b, #4834d4, #686de0);
@@ -103,15 +112,7 @@ li {
   -webkit-text-stroke: 1px #00000088;
 }
 
-@keyframes gradientMove {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
+
 .Slide-From-Top {
   animation: slide_from_top 0.5s ease-in-out forwards;
 }

@@ -1,12 +1,3 @@
-export interface Friend {
-  email: string;
-  firstname: string;
-  lastname: string;
-  profilePicture?: string;
-  lastmessage: string;
-  recievedtime: string;
-  unread: number;
-}
 export interface SignUpData {
   firstname: string;
   lastname: string;
@@ -30,11 +21,51 @@ export interface User {
   profileImage?: string;
   coverImage?: string | null;
   token?: string;
+  lastSeen?: Date;
 }
 
-export interface FriendRequest {
-  from: string;
+export interface Friend {
+  myId: string;
+  userId: string;
+  profileimage: string;
+  username: string;
+  firstname: string;
+  lastname: string;
+  lastMessage: string;
+}
+export interface Participant {
+  userId: string;
+  firstname: string;
+  lastname: string;
+}
+
+export interface Conversation {
+  userId: string;
+  conversationId: string;
+  otherUserId: string;
+  userFname: string;
+  userLname: string;
+  otherUserFname: string;
+  otherUserLName: string;
+  lastMessage?: string;
+}
+
+export interface Chat {
+  conversationId: string;
   senderId: string;
+  recieverId: string;
   message: string;
-  targetUserId?: string;
+  status?: string;
+  createdAt?: string;
+  saved?: boolean;
+}
+export interface StartChat {
+  id: string;
+  firstName: string;
+  lastName: string;
+  recieverId: string;
+}
+export interface Member {
+  id: string;
+  info: { firstname: string; lastname: string };
 }

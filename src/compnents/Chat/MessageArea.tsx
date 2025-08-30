@@ -1,45 +1,200 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { useSelector } from "react-redux";
-import { ReduxtState } from "@/src/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
 import Button from "@/src/lib/Components/Basic/Button";
 import { IoCall } from "react-icons/io5";
 import { IoMdMore } from "react-icons/io";
 import { IoSend } from "react-icons/io5";
 import { FaVideo } from "react-icons/fa";
-interface MessageBody {
-  time: string;
-  username: string;
-  message: string;
-}
+import { AddFriendServerAction } from "@/src/server_side/actions/FriendServerAction";
+import { chatHistoryFetcher } from "@/src/utils/friendRequestFetcher";
+import useSWR from "swr";
+import { useSession } from "next-auth/react";
+import { Chat, Conversation, StartChat } from "@/interface/Types";
+import {
+  getChatHistory,
+  getChats,
+} from "@/src/server_side/actions/ChatHistoryServerAction";
+import {
+  clearLiveMessages,
+  setLiveMessages,
+  setWholeChat,
+} from "@/src/redux/chatSlicer";
+import { setLastMessage } from "@/src/redux/chatSlicer";
+import {
+  getLastSeen,
+  updateLastSeen,
+} from "@/src/server_side/actions/UserLastSeenServerAction";
+
 interface MessageProps {
   useFor: "AI" | "Chat";
+  chats: Conversation[];
+  mutateChats: () => Promise<Conversation[]>;
 }
 
-const MessageArea = ({ useFor }: MessageProps) => {
+const MessageArea = ({ useFor, mutateChats, chats }: MessageProps) => {
+  //Redux Global States
   const chat = useSelector((store: ReduxtState) => store.chat);
+  const liveMessages = useSelector(
+    (store: ReduxtState) => store.chat.liveMessages
+  );
+  const startChat = useSelector((store: ReduxtState) => store.chat.startChat);
 
-  const username = "Rashmika";
+  //React Local States
   const [typeMessage, setTypeMessage] = useState<string>("");
-  const [messages, setMessages] = useState<MessageBody[]>([]);
+  const [messages, setMessages] = useState<Chat[]>([]);
 
-  const handleMessages = (time: Date) => {
-    if (typeMessage.length > 0) {
-      setMessages([
-        ...messages,
-        {
-          username: username,
-          time: time.toLocaleTimeString(),
-          message: typeMessage,
-        },
-      ]);
+  //Variables
+
+  // hooks declarations
+  const { data: session } = useSession();
+
+  const dispatch = useDispatch<ReduxDispatch>();
+  useEffect(() => {
+    dispatch(clearLiveMessages());
+    const getAllMessage = async () => {
+      const result = await getChatHistory(
+        session?.user._id,
+        startChat?.id ?? ""
+      );
+      if (result) setMessages(result.data ?? []);
+    };
+    getAllMessage();
+  }, [dispatch, session?.user._id, startChat]);
+
+  useEffect(() => {
+    setMessages((prev) => [...prev, ...liveMessages]);
+  }, [liveMessages]);
+
+  useEffect(() => {
+    if (messages?.length > 0) {
+      dispatch(setWholeChat(messages));
+
+      // set last message for this conversation
+      const last = messages.at(-1);
+      if (last) {
+        dispatch(
+          setLastMessage({
+            conversationId: last.conversationId,
+            message: last.message,
+          })
+        );
+      }
     }
-    setTypeMessage("");
+  }, [messages, dispatch]);
+
+  const [currentChat, setCurrentChat] = useState<StartChat | null>(null);
+  async function handleAddFriend() {
+    const formdata = new FormData();
+    if (chat && session) {
+      const id1 = chat.chatWith?.userId;
+      const id2 = session?.user._id;
+      if (!id1 || !id2) return;
+      const combinedId = id1 < id2 ? id1 + id2 : id2 + id1;
+
+      formdata.append("userId", session?.user._id ?? "");
+      formdata.append("conversationId", combinedId);
+      formdata.append("otherUserId", chat.chatWith?.userId ?? "");
+      formdata.append("userFname", session?.user?.firstname ?? "");
+      formdata.append("userLname", session?.user?.lastname ?? "");
+      formdata.append("otherUserFname", chat.chatWith?.firstname ?? "");
+      formdata.append("otherUserLName", chat.chatWith?.lastname ?? "");
+      formdata.append(
+        "lastMessage",
+        messages[messages.length - 1]?.message ?? ""
+      );
+    }
+
+    setCurrentChat({
+      id: formdata.get("conversationId") as string,
+      recieverId: formdata.get("otherUserId") as string,
+      firstName: formdata.get("userFname") as string,
+      lastName: formdata.get("userLname") as string,
+    });
+    const result = await AddFriendServerAction(formdata);
+    if (result) {
+      mutateChats();
+    } else {
+    }
+  }
+
+  //for send message -> pusher and store message on db
+  const sendMessage = async () => {
+    if ((currentChat || startChat) && session) {
+      const userMessage: Chat = {
+        conversationId: startChat?.id ?? currentChat?.id ?? "",
+        senderId: session?.user._id ?? "",
+        recieverId: startChat?.recieverId ?? currentChat?.recieverId ?? "",
+        message: typeMessage ?? "",
+        createdAt: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, userMessage]);
+
+      try {
+        setTypeMessage("");
+        const res = await fetch("/api/presence-message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            conversationId: startChat?.id ?? currentChat?.id ?? "",
+            recieverId: startChat?.recieverId ?? currentChat?.recieverId ?? "",
+            userFname: startChat?.firstName ?? currentChat?.firstName ?? "",
+            userLname: startChat?.lastName ?? "",
+            senderId: session?.user._id,
+            message: typeMessage ?? "",
+            lastMessage: typeMessage ?? "",
+            status: "sent",
+            createdAt: new Date().toISOString(),
+          }),
+        });
+        if (!res.ok) {
+          console.error("Failed to send friend request:", await res.json());
+        }
+      } catch (error) {
+        console.error("Error sending friend request:", error);
+      }
+    }
   };
 
-  const aiChat = useSelector((store: ReduxtState) => store.aiChat.openChat);
+  const onlineUsers = useSelector(
+    (store: ReduxtState) => store.chat.onlineUsers
+  );
 
+  console.log("😍😍ONline users", onlineUsers);
+  console.log("😍😍user id ", startChat?.recieverId);
+
+  const [checkOnline, setCheckOnline] = useState<boolean>(
+    onlineUsers.some((user) => user.id === startChat?.recieverId)
+  );
+
+  const [lastSeen, setLastSeen] = useState<Date>();
+
+  useEffect(() => {
+    const handleUpdateLastSeen = async () => {
+      const isOnline = onlineUsers.some(
+        (user) => user.id === startChat?.recieverId
+      );
+
+      if (isOnline) {
+        setCheckOnline(true);
+      } else {
+        setCheckOnline(false);
+
+        if (session?.user._id) {
+          const res = await getLastSeen(startChat?.recieverId);
+          if (res) {
+            setLastSeen(res.data.lastSeen);
+          }
+        }
+      }
+    };
+
+    handleUpdateLastSeen(); // ✅ actually call it
+  }, [onlineUsers, startChat?.recieverId, session?.user._id]);
+
+  console.log("LastSeen", lastSeen);
   return (
     <div className="flex flex-col w-full h-full select-none">
       {/* Header */}
@@ -58,14 +213,50 @@ const MessageArea = ({ useFor }: MessageProps) => {
           {useFor === "Chat" ? (
             <div>
               <h1 className="font-bold">
-                {chat.chatWith?.firstname + " " + chat.chatWith?.lastname}
+                {
+                  // currentChat
+                  //   ? (startChat?.firstName ?? chat.chatWith?.firstname) +
+                  //     " " +
+                  //     (startChat?.lastName ?? chat.chatWith?.lastname)
+                  //   : (startChat?.firstName ?? chat.chatWith?.firstname) +
+                  //     " " +
+                  //     (startChat?.lastName ?? chat.chatWith?.lastname)
+
+                  (startChat?.firstName ?? chat.chatWith?.firstname) +
+                    " " +
+                    (startChat?.lastName ?? chat.chatWith?.lastname)
+                }
               </h1>
-              <p className="text-sm text-gray-400">Last seen 3 hours ago</p>
+              <p className="text-sm text-gray-400">
+                {checkOnline
+                  ? "Online"
+                  : lastSeen
+                  ? (() => {
+                      const ls = new Date(lastSeen);
+                      const now = new Date();
+
+                      const isToday =
+                        ls.getDate() === now.getDate() &&
+                        ls.getMonth() === now.getMonth() &&
+                        ls.getFullYear() === now.getFullYear();
+
+                      return isToday
+                        ? ls.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }) // ex: 09:30 PM
+                        : `${ls.toDateString()} ${ls.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}`;
+                    })()
+                  : "Offline"}
+              </p>
             </div>
           ) : (
             <div>
-              <h1 className="font-bold">{aiChat?.title}</h1>
-              <p className="text-sm text-gray-400">Last seen 3 hours ago</p>
+              {/* <h1 className="font-bold">{aiChat?.title}</h1> */}
+              {/* <p className="text-sm text-gray-400">Last seen 3 hours ago</p> */}
             </div>
           )}
         </div>
@@ -86,28 +277,51 @@ const MessageArea = ({ useFor }: MessageProps) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 px-5 py-3">
-        {messages[0]?.time && (
-          <div className="text-center text-gray-400 mb-3">
-            Today {messages[0]?.time}
+      <div className="relative flex-1 px-5 py-3">
+        {/* {chat.chatWith?.lastMessage === undefined && !saved && ( */}
+        {messages.length === 0 && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-gray-400 mb-3 flex-col inset-0">
+            <div className="flex flex-col justify-center items-center">
+              <span className="text-xl font-semibold text-gray-800">
+                Welcome to the Chat!
+              </span>
+              <span className="text-sm text-gray-600 mt-2">
+                You’re all set to start a conversation.
+              </span>
+              <span className="text-sm text-gray-600"></span>
+              <div className="flex justify-center items-center gap-4 mt-6">
+                <Button
+                  name="Let's Get Chatting"
+                  onClick={handleAddFriend}
+                  className="bg-blue-600 text-white hover:bg-blue-700"
+                ></Button>
+              </div>
+            </div>
           </div>
         )}
-        {messages.map((user, i) => (
+        {/* )} */}
+        {...messages.map((user, i) => (
           <div
             key={i}
             className={`mb-2 flex ${
-              user.username === username ? "justify-end" : "justify-start"
+              user.senderId === session?.user._id
+                ? "justify-end"
+                : "justify-start"
             }`}
           >
-            <p
-              className={`max-w-[75%] px-4 py-2 shadow-sm text-sm ${
-                user.username === username
-                  ? "bg-purple-700 text-white rounded-r-3xl rounded-bl-3xl"
-                  : "bg-gray-200 text-gray-700 rounded-3xl"
+            <div
+              className={`flex justify-center items-end gap-2 max-w-[75%] px-4 py-2  text-sm shadow-sm ${
+                user.senderId === session?.user._id
+                  ? " bg-gradient-to-r from-purple-600 to-purple-400 rounded-bl-2xl"
+                  : " bg-gradient-to-r from-blue-600 to-blue-300 rounded-br-2xl"
               }`}
             >
-              {user.message}
-            </p>
+              <span className={`text-sm text-white`}>{user.message}</span>
+              {/* message created time -> send time  */}
+              <span className="text-[10px] text-gray-200 font-extralight">
+                {user.createdAt?.split("T")[1].split("Z")[0].slice(0, 5)}
+              </span>
+            </div>
           </div>
         ))}
       </div>
@@ -117,14 +331,23 @@ const MessageArea = ({ useFor }: MessageProps) => {
         <input
           value={typeMessage}
           onChange={(e) => setTypeMessage(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleMessages(new Date())}
+          onKeyDown={
+            (e) => {
+              if (!typeMessage.trim()) return;
+              if (e.key === "Enter") sendMessage();
+            }
+            // e.key === "Enter" && (sendMessage(), handleMessages(new Date()))
+          }
           placeholder="Type a message..."
           className="flex-1 bg-gray-100 p-2 px-4 rounded-2xl border border-gray-300 outline-none"
         />
         <Button
           radius="full"
           className="rounded-full bg-purple-500 text-white px-4 py-2"
-          onClick={() => handleMessages(new Date())}
+          onClick={() => {
+            if (!typeMessage.trim()) return;
+            sendMessage();
+          }}
         >
           <IoSend size={25} />
         </Button>

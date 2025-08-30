@@ -1,22 +1,39 @@
 "use client";
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage"; // uses localStorage
+
 import setNotify from "./NotifySlicer";
-// import feedSlicer from "./FeedSlicer";
 import EmailSlicer from "./emailSlicer";
 import ChatSlicer from "./chatSlicer";
 import aiChatSlicer from "./aiChatSlicer";
+import lastMessageSlicer from "./LastMessage";
+
+const rootReducer = combineReducers({
+  lastMessage: lastMessageSlicer,
+  chat: ChatSlicer,
+  inbox: EmailSlicer,
+  notify: setNotify,
+  aiChat: aiChatSlicer,
+});
+
+const persistConfig = {
+  key: "root",
+  storage,
+  whitelist: ["lastMessage"], // ✅ only persist what you need
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
 export const store = configureStore({
-  reducer: {
-    chat: ChatSlicer,
-    inbox: EmailSlicer,
-    notify: setNotify,
-    aiChat: aiChatSlicer,
-  },
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     }),
 });
+
+export const persistor = persistStore(store);
 
 export type ReduxtState = ReturnType<typeof store.getState>;
 export type ReduxDispatch = typeof store.dispatch;

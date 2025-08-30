@@ -25,6 +25,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  lastSeen: {
+    type: Date,
+    required: false,
+  },
 });
 const User = mongoose.models.User || mongoose.model("User", UserSchema);
 export default User;

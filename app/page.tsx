@@ -1,13 +1,5 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
-import SendRequestButton from "@/src/compnents/Chat/SendRequestButton";
-import GetAllUsers from "@/src/server_side/actions/GetAllUsers";
-import SignOutButton_ClientSide from "@/src/lib/Components/Basic/SignOutButton_ClientSide";
-import PusherListenerPrivate from "@/src/compnents/Chat/Private/PusherListenerPrivate";
-import PusherListenerPresence from "@/src/compnents/Chat/Presence/PusherListenerPresence";
-import Sonner from "@/src/compnents/Sonner/Sonner";
-import Chat from "@/src/compnents/Chat/Chat";
-import ProgressBar from "@/src/lib/Components/Basic/ProgressBar";
 
 // Mock function to get all users (replace with your actual implementation)
 export default async function Home() {
@@ -20,7 +12,6 @@ export default async function Home() {
 
   return (
     <div>
-   
       {/* <PusherListenerPrivate user_id={session.user._id} />
       <SignOutButton_ClientSide />
       <h1 className="text-2xl font-bold mb-4">

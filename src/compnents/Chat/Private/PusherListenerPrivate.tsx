@@ -4,19 +4,11 @@ import Pusher from "pusher-js";
 import { useDispatch, useSelector } from "react-redux";
 import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
 import {
-  setFriendRequest,
   setRequestData,
   setSimpleNotification,
 } from "@/src/redux/NotifySlicer";
-import AddFriend from "@/src/server_side/actions/FriendsRequests";
-import { data } from "framer-motion/client";
-import { Friend, FriendRequest } from "@/interface/Types";
-
-type MessageType = {
-  from: string;
-  senderId: string;
-  message: string;
-};
+import { Chat } from "@/interface/Types";
+import { setLiveMessages } from "@/src/redux/chatSlicer";
 
 export default function PusherListenerPrivate({
   user_id,
@@ -42,50 +34,31 @@ export default function PusherListenerPrivate({
     const channel = pusher.subscribe(`private-user-${user_id}`);
 
     channel.bind("pusher:subscription_succeeded", () => {
-      // console.log(`Subscribed to private-user-${user_id}`);
+      console.log(`Subscribed to private-user-${user_id}`);
     });
 
-    channel.bind("pusher:subscription_error", (error: MessageType) => {
-      // console.error("Subscription error:", error);
+    channel.bind("pusher:subscription_error", (error: Chat) => {
+      console.error("Subscription error:", error);
     });
 
-    channel.bind("friend-request", (data: MessageType) => {
-      dispatch(
-        setRequestData({
-          from: data.from,
-          senderId: user_id!,
-          message: `🔔 New Friend request. You have friend request from ${data.from}`,
-        })
-      );
-      const exists =
-        friendRequests &&
-        friendRequests.some(
-          (req) =>
-            req.from === data.from &&
-            req.senderId === user_id &&
-            req.targetUserId === data.senderId
-        );
+    channel.bind("chat-history", (data: Chat) => {
+      dispatch(setLiveMessages(data));
 
-      if (!exists) {
-        const msg = `🔔 New Friend request. You have friend request from ${data.from}`;
-        const notifiedTime: number =
-          Date.now() + Math.floor(Math.random() * 1000000);
+      // const notifiedTime: number =
+      //   Date.now() + Math.floor(Math.random() * 1000000);
 
-        dispatch(
-          setSimpleNotification({
-            message: msg,
-            id: notifiedTime,
-          })
-        );
-      } else {
-        console.log("Duplicate friend request — dispatch skipped.");
-      }
+      // dispatch(
+      //   setSimpleNotification({
+      //     message: data.message,
+      //     id: notifiedTime,
+      //   })
+      // );
     });
 
     return () => {
       pusher.unsubscribe(`private-user-${user_id}`);
     };
-  }, [dispatch, friendRequests, user_id]);
+  }, [dispatch, user_id]);
 
   return null;
 }

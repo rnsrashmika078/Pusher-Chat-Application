@@ -1,63 +1,59 @@
 "use client";
-import { setActiveTab, setChatWith } from "@/src/redux/chatSlicer";
+import {
+  setActiveTab,
+  setChatWith,
+  setStartChat,
+} from "@/src/redux/chatSlicer";
 import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
-import { FaPeopleGroup } from "react-icons/fa6";
 import { IoIosMail } from "react-icons/io";
 import { IoCall } from "react-icons/io5";
-import { RiMessage2Fill } from "react-icons/ri";
+import { RiChat2Fill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
-import { FriendRequest, User } from "@/interface/Types";
+import {
+  Chat,
+  Conversation,
+  Friend,
+  FriendRequest,
+  User,
+} from "@/interface/Types";
 import SearchArea from "@/src/lib/Components/Basic/SearchArea";
-import { useEffect, useRef, useState } from "react";
+import { JSX, useEffect, useRef, useState } from "react";
 import { useDebounce } from "@/src/hooks/useDebounce";
 import Button from "@/src/lib/Components/Basic/Button";
 import PusherListenerPrivate from "./Private/PusherListenerPrivate";
 import { useSession } from "next-auth/react";
 import { setFriendRequest } from "@/src/redux/NotifySlicer";
-import {
-  AddFriend,
-  GetFriendRequests,
-} from "@/src/server_side/actions/FriendsRequests";
+
 import useSWR from "swr";
-import { friendRequestFetcher } from "@/src/utils/friendRequestFetcher";
+import { allFriendsFetcher } from "@/src/utils/friendRequestFetcher";
+import ShowNotification from "./Notification/ShowNotification";
+import {
+  getChatHistory,
+  getChats,
+} from "@/src/server_side/actions/ChatHistoryServerAction";
 
 interface ChatListLayoutProps {
   allUsers?: User[];
   toggle: boolean;
+  chats: Conversation[];
+  mutateChats: () => Promise<Conversation[]>;
 }
-const ChatListPanel: React.FC<ChatListLayoutProps> = ({ toggle, allUsers }) => {
+const ChatListPanel: React.FC<ChatListLayoutProps> = ({
+  toggle,
+  allUsers,
+  chats,
+  mutateChats,
+}) => {
   const { data: session } = useSession();
-  const friends = [
-    {
-      email: "rnsrashmika078@gmail.com",
-      firstname: "Rashmika",
-      lastname: "Siriwardhana",
-      profilePicture: "https://localhost:3000/api",
-      lastmessage: "I will take over🤣",
-      recievedtime: "3:25 PM",
-      unread: 12,
-    },
-    {
-      email: "mahela@gmail.com",
-      firstname: "Mahela",
-      lastname: "Jayawardhana",
-      lastmessage: "This is the best time to take over the shit out of it🤌",
-      recievedtime: "7:51 AM",
-      unread: 6,
-    },
-  ];
+
   const activeTab = useSelector((store: ReduxtState) => store.chat.activeTab);
-  const friendRequests = useSelector(
-    (store: ReduxtState) => store.notify.friendRequest
+
+  const wholeChat = useSelector((store: ReduxtState) => store.chat.wholeChat);
+  const startChat = useSelector((store: ReduxtState) => store.chat.startChat);
+  const liveMessages = useSelector(
+    (store: ReduxtState) => store.chat.liveMessages
   );
-  const RequestData = useSelector(
-    (store: ReduxtState) => store.notify.RequestData
-  );
-  const chatWith = useSelector(
-    (store: ReduxtState) => store.chat.chatWith
-  );
-  console.log(friendRequests);
   const dispatch = useDispatch<ReduxDispatch>();
   const [serachTerm, setSearchTerm] = useState<string>("");
   const searchRef = useRef<HTMLInputElement>(null);
@@ -67,77 +63,6 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({ toggle, allUsers }) => {
     300
   );
 
-  const addFriendRequest = async (data: FriendRequest) => {
-    const formData = new FormData();
-    formData.append("from", data.from);
-    formData.append("targetUserId", data.senderId);
-    formData.append("senderId", session!.user._id);
-    formData.append(
-      "message",
-      "New Friend request. You have friend request from"
-    );
-
-    await AddFriend(formData);
-  };
-  const [error, setError] = useState<string>();
-  const [storedRequests, setStoredRequests] = useState<FriendRequest[]>([]);
-
-  // useEffect(() => {
-  //   const getRequests = async () => {
-  //     try {
-  //       const Requests = await GetFriendRequests(session!.user._id);
-  //       console.log("ALL REQUESTS", Requests);
-  //       setStoredRequests(Requests);
-  //       // alert(JSON.stringify(Requests));
-  //     } catch (error: unknown) {
-  //       setError(
-  //         error instanceof Error ? error.message : "Unknown error occurred"
-  //       );
-  //     }
-  //   };
-  //   getRequests();
-  // }, [session]);
-
-  const { data } = useSWR(session?.user._id, friendRequestFetcher);
-
-  // if (isLoading) return <p>Loading...</p>;
-  // if (error) return <p>Error loading requests</p>;
-
-  useEffect(() => {
-    const exists =
-      friendRequests &&
-      friendRequests.some(
-        (req) =>
-          RequestData &&
-          req.from === RequestData.from &&
-          req.senderId === session?.user._id &&
-          req.targetUserId === RequestData.senderId
-      );
-
-    // const storeOnDb = storedRequests.map((request,index) => request.)
-    if (!exists && RequestData) {
-      dispatch(
-        setFriendRequest({
-          from: RequestData.from,
-          senderId: session!.user._id,
-          message: `🔔 New Friend request. You have friend request from ${RequestData.from}`,
-          targetUserId: RequestData.senderId,
-        })
-      );
-      addFriendRequest(RequestData);
-    } else {
-      console.log("Duplicate friend request — dispatch skipped.");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [RequestData]);
-
-  // const existRequest = storedRequests.map(
-  //   (req, index) =>
-  //     RequestData &&
-  //     req.from === RequestData.from &&
-  //     req.senderId === session?.user._id &&
-  //     req.targetUserId === RequestData.senderId
-  // );
   const filteredData = allUsers?.filter(
     (user) =>
       (user.firstname &&
@@ -148,18 +73,22 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({ toggle, allUsers }) => {
 
   const [mainTab, setMainTab] = useState<string>("Message");
 
-  const tabNames = ["Message", "Call", "Notification"];
+  const tabNames = ["Message", "Call", "FriendRequest"];
   const Tabs = [
-    <RiMessage2Fill key="message" size={30} color="purple" />,
+    <RiChat2Fill key="Message" size={30} color="purple" />,
     <IoCall key="call" size={30} color="purple" />,
-    <div key="notification" className="relative">
+    <div key="friendRequest" className="relative">
       <IoIosMail size={30} color="purple" />
       <div className="absolute rounded-full bg-red-600 w-5 h-5 flex justify-center items-center text-white -top-1 -right-2">
-        {friendRequests?.length || data?.length}
+        {/* {friendRequests?.length ?? data?.length} */}
       </div>
     </div>,
   ];
 
+  const [Chats, setChats] = useState<Conversation[]>([]);
+  const lastMessages = useSelector(
+    (store: ReduxtState) => store.chat.lastMessage
+  );
 
   return (
     <div className="relative w-full select-none border-r border-gray-200 shadow-sm">
@@ -193,7 +122,6 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({ toggle, allUsers }) => {
 
           <div className=" sticky  bg-white p-5 shadow-sm mt-1">
             <h1 className="text-4xl font-bold mb-2">{activeTab || "Chat"}</h1>
-
             <>
               <div className="flex gap-2 p-2 text-xs font-bold justify-start items-start">
                 <p>DIRECT</p>
@@ -207,7 +135,6 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({ toggle, allUsers }) => {
                 ref={searchRef}
                 onChange={(e) => handleSearch(e.target.value)}
               />
-
               <div
                 className={`${
                   serachTerm !== "" &&
@@ -232,56 +159,82 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({ toggle, allUsers }) => {
 
                           {data.firstname + " " + data.lastname}
                         </div>
-                        <Button
+                        {/* <Button
                           variant="windows"
                           size="xs"
                           name="+"
                           onClick={() => PusherListenerPrivate}
-                        ></Button>
+                        ></Button> */}
                       </div>
                     </ul>
                   ))}
               </div>
             </>
           </div>
-          {activeTab !== "Settings" ? (
+          {mainTab === "FriendRequest" && <ShowNotification />}
+
+          {activeTab !== "Settings" && mainTab === "Message" ? (
             <div className="p-5">
-              {friends.map((friend, index) => (
-                <div
-                  key={index}
-                  className="flex gap-3 mt-2 bg-white p-3 rounded-2xl shadow-sm"
-                  onClick={() => dispatch(setChatWith(friend))}
-                >
-                  <Image
-                    src="https://randomuser.me/api/portraits/men/27.jpg"
-                    alt="Reviewer"
-                    width={10}
-                    height={10}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div className="w-full">
-                    <div className="flex justify-between items-center ">
-                      <h1 className="font-bold">
-                        {friend.firstname + " " + friend.lastname}
-                      </h1>
-                      <p className="text-xs text-gray-400 ">
-                        {friend.recievedtime}
-                      </p>
-                    </div>
-                    <div className="flex justify-between items-center ">
-                      {/* whitespace-nowrap overflow-hidden text-ellipsis */}
-                      <p className="text-sm text-gray-400 ">
-                        {friend.lastmessage.length > 35
-                          ? friend.lastmessage.slice(0, 35) + "....."
-                          : friend.lastmessage}
-                      </p>
-                      <p className="flex justify-center items-center text-white text-sm bg-green-500 w-5 h-5 p-2 rounded-full">
-                        {friend.unread}
-                      </p>
+              {chats &&
+                chats?.map((friend: Conversation, index: number) => (
+                  <div
+                    key={index}
+                    className="flex gap-3 mt-2 bg-white p-3 rounded-2xl shadow-sm"
+                    onClick={() => {
+                      dispatch(
+                        setStartChat({
+                          id: friend.conversationId!,
+                          firstName: friend.otherUserFname!,
+                          lastName: friend.otherUserLName!,
+                          recieverId: friend.otherUserId,
+                        })
+                      );
+                    }}
+                  >
+                    <Image
+                      src="https://randomuser.me/api/portraits/men/27.jpg"
+                      alt="Reviewer"
+                      width={10}
+                      height={10}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div className="w-full">
+                      <div className="flex justify-between items-center ">
+                        <h1 className="font-bold">
+                          {friend.otherUserFname + friend.otherUserLName}
+                        </h1>
+                        <p className="text-xs text-gray-400 ">
+                          {/* {friend.recievedtime} */}
+                        </p>
+                      </div>
+                      <div className="flex justify-between items-center ">
+                        {/* whitespace-nowrap overflow-hidden text-ellipsis */}
+                        {/* <p className="text-sm text-gray-400 ">
+                          {(() => {
+                            const userId = session?.user._id;
+                            const relevantMessages = wholeChat.filter(
+                              (msg) =>
+                                (msg.senderId === userId &&
+                                  msg.recieverId === friend.otherUserId) ||
+                                (msg.recieverId === userId &&
+                                  msg.senderId === friend.otherUserId)
+                            );
+                            const lastMsg = relevantMessages.at(-1); // get last relevant message
+
+                            return lastMsg?.message || friend.lastMessage;
+                          })()}
+                        </p> */}
+
+                        <p className="text-sm text-gray-400">
+                          {lastMessages[friend.conversationId] ||
+                            friend.lastMessage ||
+                            "No messages yet"}
+                        </p>
+                        <p className="flex justify-center items-center text-white text-sm bg-green-500 w-5 h-5 p-2 rounded-full"></p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           ) : null}
         </div>
@@ -290,3 +243,15 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({ toggle, allUsers }) => {
   );
 };
 export default ChatListPanel;
+// dispatch(setLastMessage());
+// {
+
+//   if(wholeChat){
+//     wholeChat[wholeChat.length - 1]?.recieverId === userid
+//   }
+//   wholeChat
+//     ?  ||
+//       wholeChat[wholeChat.length - 1]?.recieverId === otherid
+//       ? wholeChat[wholeChat.length - 1]?.message
+//       : friend.lastMessage
+//     : liveMessages && liveMessages[liveMessages.length - 1].message;
