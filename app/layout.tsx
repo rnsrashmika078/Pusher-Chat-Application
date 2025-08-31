@@ -10,22 +10,24 @@ import "./globals.css";
 import ClientProvider from "@/src/redux/ClientProvider";
 import NavBar from "@/src/compnents/NavBar/NavBar";
 import Sonner from "@/src/compnents/Sonner/Sonner";
-import { SessionProvider } from "next-auth/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const merienda = Merienda({
   // variable: "--font-geist-sans",
   weight: "400",
   subsets: ["latin"],
 });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const roboto = Roboto_Condensed({
   // variable: "--font-geist-sans",
   weight: "400",
   subsets: ["latin"],
 });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const rubik = Rubik({
   // variable: "--font-geist-sans",
   weight: "400",

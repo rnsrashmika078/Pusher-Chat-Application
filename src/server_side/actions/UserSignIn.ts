@@ -3,6 +3,7 @@ import connectDB from "../backend/lib/connectDB";
 import User from "../backend/models/User";
 import bcrypt from "bcrypt";
 
+// @ts-expect-error: type mismatch error
 export default async function UserSignIn({ username, password }) {
   await connectDB();
   const user = await User.findOne({ username: username });

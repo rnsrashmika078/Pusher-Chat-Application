@@ -9,7 +9,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, signUpSchema } from "@/src/validation/authSchema";
 import { SignInData, SignUpData } from "@/interface/Types/index";
-import Sonner from "../Sonner/Sonner";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDispatch } from "react-redux";
@@ -17,6 +16,7 @@ import { ReduxDispatch } from "@/src/redux/store";
 import { setSimpleNotification } from "@/src/redux/NotifySlicer";
 const SignForms: React.FC = () => {
   const [formType, setFormType] = useState<"signIn" | "signUp">("signIn");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [message, setMessage] = useState<string | null>(null);
   type FormData = SignInData | SignUpData;
 
@@ -101,6 +101,7 @@ const SignForms: React.FC = () => {
 
   useEffect(() => {
     reset();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formType]);
 
   // Framer motion

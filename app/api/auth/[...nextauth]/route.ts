@@ -17,7 +17,7 @@ export const authOptions: AuthOptions = {
         username: {},
         password: {},
       },
-      // @ts-expect-error
+      // @ts-expect-error: type mismatch error
       async authorize(credentials) {
         try {
           if (!credentials?.username || !credentials?.password) return null;
