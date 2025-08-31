@@ -5,7 +5,7 @@ export default async function GetAllUsers() {
   try {
     await connectDB();
   } catch (error) {
-    console.log("Your are offline", error);
+    console.log("Your are offline", error instanceof Error && error.message);
   }
   const allUsers = await User.find().select("-password");
   const modified = allUsers.map((user) => ({

@@ -159,8 +159,6 @@ const MessageArea = ({ useFor, mutateChats}: MessageProps) => {
     (store: ReduxtState) => store.chat.onlineUsers
   );
 
-  console.log("😍😍ONline users", onlineUsers);
-  console.log("😍😍user id ", startChat?.recieverId);
 
   const [checkOnline, setCheckOnline] = useState<boolean>(
     onlineUsers.some((user) => user.id === startChat?.recieverId)
@@ -191,7 +189,6 @@ const MessageArea = ({ useFor, mutateChats}: MessageProps) => {
     handleUpdateLastSeen(); // ✅ actually call it
   }, [onlineUsers, startChat?.recieverId, session?.user._id]);
 
-  console.log("LastSeen", lastSeen);
   return (
     <div className="flex flex-col w-full h-full select-none">
       {/* Header */}

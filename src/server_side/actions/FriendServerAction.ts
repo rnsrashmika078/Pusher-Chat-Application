@@ -4,7 +4,6 @@ import Conversation from "../backend/models/Conversation";
 export async function AddFriendServerAction(formData: FormData) {
   try {
     await connectDB();
-    console.log(formData);
     const userId = formData.get("userId") as string;
     const conversationId = formData.get("conversationId") as string;
     const otherUserId = formData.get("otherUserId") as string;
@@ -43,7 +42,6 @@ export async function AddFriendServerAction(formData: FormData) {
     });
     await newConversation.save();
     await newConversation2.save();
-    console.log("YES", newConversation);
     return JSON.parse(JSON.stringify([newConversation, newConversation2]));
   } catch (error) {
     console.error("Error:", error);

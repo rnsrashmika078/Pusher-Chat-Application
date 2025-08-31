@@ -5,7 +5,6 @@ import User from "../backend/models/User";
 export default async function SignWithGoogle(formData: FormData) {
   await connectDB();
 
-  console.log("Form data comes to BE", formData);
 
   const username = formData.get("username") as string;
   const firstname = formData.get("firstname") as string;
@@ -16,7 +15,6 @@ export default async function SignWithGoogle(formData: FormData) {
   const user = await User.findOne({ username });
 
   if (user) {
-    console.log("User already exists in DB", user);
     return user;
   }
 
@@ -27,7 +25,6 @@ export default async function SignWithGoogle(formData: FormData) {
     email,
     profileimage,
   });
-  console.log("New User ", newUser);
   await newUser.save();
 
   return newUser;
