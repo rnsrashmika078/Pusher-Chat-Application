@@ -27,6 +27,7 @@ export async function POST(req: Request) {
     } = await req.json();
     const session = await getServerSession(authOptions);
     if (!session) {
+      console.log("Session issue");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const saveContact = await Conversation.find({
@@ -44,6 +45,7 @@ export async function POST(req: Request) {
       lastMessage,
       status,
     });
+    console.log("Message data", newMessage);
 
     await newMessage.save();
     // 4️⃣ Trigger Pusher for real-time updates
