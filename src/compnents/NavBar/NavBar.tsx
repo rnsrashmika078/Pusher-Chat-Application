@@ -41,7 +41,7 @@ const NavBar = () => {
           initial="visible"
           animate={`${!toggle ? "visible" : "hidden"}`}
           exit="exit"
-          className={`${!toggle ? "opacity-100" : "opacity-0"} text-2xl`}
+          className={`italic font-bold ${!toggle ? "opacity-100" : "opacity-0"} text-2xl`}
         >
           AI
         </motion.h1>

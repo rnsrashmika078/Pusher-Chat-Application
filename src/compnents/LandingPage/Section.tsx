@@ -2,17 +2,31 @@
 import { motion, useAnimation, useInView } from "framer-motion";
 import React, { useEffect, useRef } from "react";
 import Image from "next/image";
+import Button from "@/src/lib/Components/Basic/Button";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+type Steps = {
+  header: string;
+  content: string;
+};
 const Section = ({
   header,
   subHeader,
   image,
-  color,
+  steps,
+  button,
+  benefits,
 }: {
   header: string;
   subHeader: string;
   image: string;
+  button?: string;
+  steps?: Steps[];
   color: string;
+  benefits?: Steps[];
 }) => {
+  const router = useRouter();
+  const { data: session } = useSession();
   const containerVariants = {
     visible: {
       transition: {
@@ -61,10 +75,10 @@ const Section = ({
         className="flex justify-center items-center mb-10 text-xs sm:text-xs md:text-xl lg:text-xl xl:text-xl gap-5"
       >
         {[
-          { text: "Next JS", color: "blue" },
-          { text: "React JS", color: "red" },
-          { text: "Typescript", color: "green" },
-          { text: "Redux", color: "purple" },
+          { text: "", color: "blue" },
+          { text: "", color: "red" },
+          { text: "", color: "green" },
+          { text: "", color: "purple" },
         ].map((icon, index) => (
           <motion.div
             variants={itemVariants}
@@ -85,16 +99,65 @@ const Section = ({
             visible: { opacity: 1, y: 0, scale: 1 },
           }}
           transition={{ duration: 1, ease: "easeOut" }}
-          className={`space-y-2 flex flex-row justify-center items-center`}
+          className={`space-y-5 flex flex-col justify-center items-start`}
         >
-          <div>
-            <h1 className="text-xl sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl font-bold">
+          {steps ? (
+            <span className="text-sm sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl font-bold text-gradient-l from-red-500 to-yellow-500">
               {header}
-            </h1>
-            <p className="text-xs sm:text-xs md:text-sm lg:text-xl xl:text-xl">
-              {subHeader}
-            </p>
-          </div>
+            </span>
+          ) : benefits ? (
+            <span className="text-sm sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl font-bold text-gradient-l from-red-500 to-yellow-500">
+              {header}
+            </span>
+          ) : null}
+          {steps && steps.length > 0 ? (
+            steps.map((s, i) => (
+              <div key={i} className="flex flex-row">
+                <div className="flex flex-col">
+                  <p className="text-sm sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl font-bold">
+                    {s.header}
+                  </p>
+                  <p className="text-xs sm:text-xs md:text-sm lg:text-xl xl:text-xl">
+                    {s.content}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : benefits ? (
+            benefits.map((s, i) => (
+              <div key={i} className="flex flex-row">
+                <div className="flex flex-col">
+                  <p className="text-sm sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl font-bold">
+                    {s.header}
+                  </p>
+                  <p className="text-xs sm:text-xs md:text-sm lg:text-xl xl:text-xl">
+                    {s.content}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div>
+              <p className="text-xl sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl font-bold">
+                {header}
+              </p>
+              <p className="text-xs sm:text-xs md:text-sm lg:text-xl xl:text-xl">
+                {subHeader}
+              </p>
+              {button && (
+                <Button
+                  className="mt-10"
+                  radius="full"
+                  name={button}
+                  onClick={() =>
+                    session
+                      ? router.push("/service/chat")
+                      : router.push("/signs")
+                  }
+                />
+              )}
+            </div>
+          )}
         </motion.div>
         <motion.div
           animate={motionControls}
@@ -108,6 +171,7 @@ const Section = ({
           <Image src={`/${image}`} width={350} height={350} alt="ai" />
         </motion.div>
       </div>
+
       <motion.div
         animate={textControls}
         initial="hidden"
@@ -115,9 +179,7 @@ const Section = ({
         transition={{ duration: 1, ease: "easeOut" }}
         className="flex justify-center items-center mt-10 text-sm sm:text-sm md:text-xl lg:text-xl xl:text-xl gap-5"
       >
-        <motion.div variants={itemVariants2}>
-          {"Powered by Node JS"}
-        </motion.div>
+        <motion.div variants={itemVariants2}>{"Powered by Pusher"}</motion.div>
       </motion.div>
     </section>
   );

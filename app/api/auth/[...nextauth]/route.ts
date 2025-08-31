@@ -17,7 +17,7 @@ export const authOptions: AuthOptions = {
         username: {},
         password: {},
       },
-      // @ts-ignore
+      // @ts-expect-error
       async authorize(credentials) {
         try {
           if (!credentials?.username || !credentials?.password) return null;

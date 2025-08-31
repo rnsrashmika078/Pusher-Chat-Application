@@ -1,5 +1,3 @@
-import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
 import React from "react";
 import Section from "./Section";
 const LandingPage = () => {
@@ -8,23 +6,53 @@ const LandingPage = () => {
       {[
         {
           sectionId: 1,
-          header: "Gear Up with AI",
-          subHeader: "Handover your tasks to AI Today",
+          header: "Instant Conversations, Anytime",
+          subHeader:
+            "Experience lightning-fast messaging powered by Next.js, Pusher, and MongoDB",
           image: "aichat.gif",
+          button: "Get Started",
           color: "bg-white",
         },
         {
           sectionId: 2,
-          header: "Level Up With Next JS",
+          header: "Why Choose Us",
           subHeader: "Powerfull Library made on top of React",
           image: "aichat2.gif",
+          benefits: [
+            {
+              header: "💬 Real-Time Messaging",
+              content: "Messages delivered instantly, no refresh needed.",
+            },
+            {
+              header: "👀 Online Presence",
+              content: "Messages stored safely with end-to-end architecture.",
+            },
+            {
+              header: "🎨 Modern UI",
+              content: "Send messages, share files, stay in sync.",
+            },
+          ],
           color: "bg-white",
         },
         {
           sectionId: 3,
-          header: "Summarize Your Resume",
+          header: "Chat Made Simple",
           subHeader: "AI helps to get idea about your resume",
           image: "aichat.gif",
+          steps: [
+            {
+              header: "1. Sign Up / Log In",
+              content: "Create your account in seconds.",
+            },
+            {
+              header: "2. Find Friends",
+              content: "Connect with people instantly.",
+            },
+            {
+              header: "3. Start Chatting",
+              content: "Send messages, share files, stay in sync.",
+            },
+          ],
           color: "bg-white",
         },
       ].map((section) => (
@@ -36,7 +64,10 @@ const LandingPage = () => {
             color={section.color}
             header={section.header}
             subHeader={section.subHeader}
+            button={section.button}
             image={section.image}
+            benefits={section.benefits}
+            steps={section.steps}
           />
         </div>
       ))}

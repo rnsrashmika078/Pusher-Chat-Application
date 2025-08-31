@@ -2,7 +2,7 @@
 import connectDB from "../backend/lib/connectDB";
 import User from "../backend/models/User";
 import bcrypt from "bcrypt";
-// @ts-ignore
+
 export default async function UserSignIn({ username, password }) {
   await connectDB();
   const user = await User.findOne({ username: username });

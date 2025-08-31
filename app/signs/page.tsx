@@ -6,7 +6,7 @@ const page = async () => {
   const session = await getServerSession();
   return (
     <div className="">
-      {!session?.user ? <SignForms /> : redirect("/dashboard")}
+      {!session?.user ? <SignForms /> : redirect("/service/chat")}
     </div>
     // <SignForms />
   );
