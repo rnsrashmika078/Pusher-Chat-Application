@@ -2,7 +2,6 @@ import React from "react";
 // import Theme from "../../theme/Theme";
 // import SignOut from "./SignOut";
 import Theme from "@/src/lib/Components/Advanced/Theme/Theme";
-import SignOut from "./SignOut";
 import DeviceInfo from "./DeviceInfo";
 const SettingsCard = () => {
   return (

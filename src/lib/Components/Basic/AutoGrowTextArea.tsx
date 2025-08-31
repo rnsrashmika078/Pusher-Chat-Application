@@ -17,7 +17,7 @@ const AutoGrowTextarea = ({ value = "", ...props }) => {
 
     // Adjust on resize (for responsiveness)
     const observer = new ResizeObserver(adjustHeight);
-    // @ts-ignore
+    // @ts-expect-error: this is error that can be ignored
     observer.observe(textRef?.current);
 
     return () => observer.disconnect();

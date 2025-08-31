@@ -1,7 +1,6 @@
 "use client";
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import Button from "../../Basic/Button";
-import { title } from "process";
 
 interface Tabs {
   id: number;
