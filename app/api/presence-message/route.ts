@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import Pusher from "pusher";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
 import Message from "@/src/server_side/backend/models/Message";
 import Conversation from "@/src/server_side/backend/models/Conversation";
+import { authOptions } from "@/src/lib/auth";
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID!,
