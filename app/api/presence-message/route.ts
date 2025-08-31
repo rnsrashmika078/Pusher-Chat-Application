@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Pusher from "pusher";
 import Message from "@/src/server_side/backend/models/Message";
 import Conversation from "@/src/server_side/backend/models/Conversation";
+import connectDB from "@/src/server_side/backend/lib/connectDB";
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID!,
@@ -13,6 +14,8 @@ const pusher = new Pusher({
 
 export async function POST(req: Request) {
   try {
+    await connectDB();
+
     let saved = true;
     const {
       conversationId,
@@ -23,7 +26,7 @@ export async function POST(req: Request) {
       status,
       createdAt,
     } = await req.json();
-   
+
     const saveContact = await Conversation.find({
       conversationId,
       userid: senderId,
