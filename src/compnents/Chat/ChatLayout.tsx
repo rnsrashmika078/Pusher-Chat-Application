@@ -9,7 +9,6 @@ import ChatListPanel from "./ChatListPanel";
 import { useSession } from "next-auth/react";
 import ChatSettings from "./ChatSettings";
 import { User } from "@/interface/Types";
-import PusherListenerPrivate from "./Private/PusherListenerPrivate";
 import PusherListenerPresence from "./Presence/PusherListenerPresence";
 import useSWR from "swr";
 import { getChats } from "@/src/server_side/actions/ChatHistoryServerAction";
@@ -24,7 +23,6 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
   const startChat = useSelector((store: ReduxtState) => store.chat.startChat);
   const chatWith = useSelector((store: ReduxtState) => store.chat.chatWith);
   const activeTab = useSelector((store: ReduxtState) => store.chat.activeTab);
-  // const [mainTab, setMainTab] = useState<string>("Message");
   useEffect(() => {
     if (typeof window !== "undefined") {
       const handleResize = () => setWidth(window.innerWidth);
@@ -81,9 +79,7 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden border-2 border-t-[var(--border)]  ">
       <div className="flex flex-1 bg-gray-800 overflow-hidden">
-        {/* @ts-ignore */}
         {/* <PusherListenerPrivate user_id={session?.user._id} /> */}
-        {/* @ts-ignore */}
         <PusherListenerPresence user_id={session?.user._id} />
         <SidePanel allUsers={allUsers} />
         {/* This is the only scrollable section */}
@@ -105,8 +101,6 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
               toggle={toggle}
               allUsers={allUsers}
               chats={chats?.data ?? []}
-              // @ts-ignore
-              mutateChats={mutate}
             />
           </div>
         )}
@@ -130,8 +124,7 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
           >
             {/* && !activeTab */}
             {startChat || chatWith ? (
-              // @ts-ignore
-              <MessageArea useFor="Chat" mutateChats={mutate} chat={chats} />
+              <MessageArea useFor="Chat" mutateChats={mutate} />
             ) : (
               <div className="text-2xl flex justify-center items-center m-auto">
                 Chat With your Friend

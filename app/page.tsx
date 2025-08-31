@@ -12,31 +12,6 @@ export default async function Home() {
 
   return (
     <div>
-      {/* <PusherListenerPrivate user_id={session.user._id} />
-      <SignOutButton_ClientSide />
-      <h1 className="text-2xl font-bold mb-4">
-        Welcome, {session.user.firstname} {session.user.lastname}
-      </h1>
-      <h2 className="text-lg mb-4">Your ID: {session.user._id}</h2>
-      <h3 className="text-xl font-semibold mb-2">Users</h3>
-      
-      <ul className="space-y-4">
-        {allUsers
-          .filter((user) => user._id !== session.user._id)
-          .map((user) => (
-            <li
-              key={user._id}
-              className="flex justify-between items-center p-4 bg-gray-100 rounded"
-            >
-              <span>
-                ID: {user._id} | Username: {user.lastname}
-              </span>
-              <SendRequestButton targetId={user._id} />
-            </li>
-          ))}
-      </ul> */}
-      {/* <Chat /> */}
-      {/* <Email /> */}
     </div>
   );
 }

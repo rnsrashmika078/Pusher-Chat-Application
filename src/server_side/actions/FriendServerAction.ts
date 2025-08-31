@@ -1,7 +1,6 @@
 "use server";
 import connectDB from "../backend/lib/connectDB";
 import Conversation from "../backend/models/Conversation";
-import Friend from "../backend/models/Friend";
 export async function AddFriendServerAction(formData: FormData) {
   try {
     await connectDB();
@@ -48,22 +47,5 @@ export async function AddFriendServerAction(formData: FormData) {
     return JSON.parse(JSON.stringify([newConversation, newConversation2]));
   } catch (error) {
     console.error("Error:", error);
-  }
-}
-export async function getFriendsServerAction(userid: string) {
-  try {
-    await connectDB();
-    const friends = await Friend.find({ myId: userid });
-
-    if (friends.length === 0) {
-      return JSON.parse(JSON.stringify(friends));
-    }
-    return JSON.parse(JSON.stringify(friends));
-  } catch (error) {
-    console.error("Error:", error);
-    return {
-      success: false,
-      message: "Something went wrong while retrieving friend.",
-    };
   }
 }

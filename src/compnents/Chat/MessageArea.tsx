@@ -9,32 +9,29 @@ import { IoMdMore } from "react-icons/io";
 import { IoSend } from "react-icons/io5";
 import { FaVideo } from "react-icons/fa";
 import { AddFriendServerAction } from "@/src/server_side/actions/FriendServerAction";
-import { chatHistoryFetcher } from "@/src/utils/friendRequestFetcher";
-import useSWR from "swr";
+import  { KeyedMutator } from "swr";
 import { useSession } from "next-auth/react";
-import { Chat, Conversation, StartChat } from "@/interface/Types";
+import { Chat,  StartChat } from "@/interface/Types";
 import {
   getChatHistory,
-  getChats,
 } from "@/src/server_side/actions/ChatHistoryServerAction";
 import {
   clearLiveMessages,
-  setLiveMessages,
   setWholeChat,
 } from "@/src/redux/chatSlicer";
 import { setLastMessage } from "@/src/redux/chatSlicer";
 import {
   getLastSeen,
-  updateLastSeen,
 } from "@/src/server_side/actions/UserLastSeenServerAction";
 
 interface MessageProps {
   useFor: "AI" | "Chat";
-  chats: Conversation[];
-  mutateChats: () => Promise<Conversation[]>;
+  mutateChats: KeyedMutator<
+    { data: unknown; error?: undefined } | { data: never[]; error: unknown }
+  >;
 }
 
-const MessageArea = ({ useFor, mutateChats, chats }: MessageProps) => {
+const MessageArea = ({ useFor, mutateChats}: MessageProps) => {
   //Redux Global States
   const chat = useSelector((store: ReduxtState) => store.chat);
   const liveMessages = useSelector(
@@ -213,12 +210,9 @@ const MessageArea = ({ useFor, mutateChats, chats }: MessageProps) => {
           {useFor === "Chat" ? (
             <div>
               <h1 className="font-bold">
-                {
-   
-                  (startChat?.firstName ?? chat.chatWith?.firstname) +
-                    " " +
-                    (startChat?.lastName ?? chat.chatWith?.lastname)
-                }
+                {(startChat?.firstName ?? chat.chatWith?.firstname) +
+                  " " +
+                  (startChat?.lastName ?? chat.chatWith?.lastname)}
               </h1>
               <p className="text-sm text-gray-400">
                 {checkOnline

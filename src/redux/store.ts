@@ -4,17 +4,13 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // uses localStorage
 
 import setNotify from "./NotifySlicer";
-import EmailSlicer from "./emailSlicer";
 import ChatSlicer from "./chatSlicer";
-import aiChatSlicer from "./aiChatSlicer";
 import lastMessageSlicer from "./LastMessage";
 
 const rootReducer = combineReducers({
   lastMessage: lastMessageSlicer,
   chat: ChatSlicer,
-  inbox: EmailSlicer,
   notify: setNotify,
-  aiChat: aiChatSlicer,
 });
 
 const persistConfig = {

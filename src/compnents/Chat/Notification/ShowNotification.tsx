@@ -1,11 +1,7 @@
 "use client";
-import { FriendRequest } from "@/interface/Types";
 import Button from "@/src/lib/Components/Basic/Button";
 import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
-import {
-  DeleteFriendRequest,
-  updateFriendRequest,
-} from "@/src/server_side/actions/FriendsRequests";
+
 import { friendRequestFetcher } from "@/src/utils/friendRequestFetcher";
 import { useSession } from "next-auth/react";
 

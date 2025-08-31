@@ -1,59 +1,30 @@
 "use client";
-import {
-  setActiveTab,
-  setChatWith,
-  setStartChat,
-} from "@/src/redux/chatSlicer";
+import { setActiveTab, setStartChat } from "@/src/redux/chatSlicer";
 import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
 import { IoIosMail } from "react-icons/io";
 import { IoCall } from "react-icons/io5";
 import { RiChat2Fill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
-import {
-  Chat,
-  Conversation,
-  Friend,
-  FriendRequest,
-  User,
-} from "@/interface/Types";
+import { Conversation, User } from "@/interface/Types";
 import SearchArea from "@/src/lib/Components/Basic/SearchArea";
-import { JSX, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useDebounce } from "@/src/hooks/useDebounce";
-import Button from "@/src/lib/Components/Basic/Button";
-import PusherListenerPrivate from "./Private/PusherListenerPrivate";
-import { useSession } from "next-auth/react";
-import { setFriendRequest } from "@/src/redux/NotifySlicer";
 
-import useSWR from "swr";
-import { allFriendsFetcher } from "@/src/utils/friendRequestFetcher";
 import ShowNotification from "./Notification/ShowNotification";
-import {
-  getChatHistory,
-  getChats,
-} from "@/src/server_side/actions/ChatHistoryServerAction";
 
 interface ChatListLayoutProps {
   allUsers?: User[];
   toggle: boolean;
   chats: Conversation[];
-  mutateChats: () => Promise<Conversation[]>;
 }
 const ChatListPanel: React.FC<ChatListLayoutProps> = ({
   toggle,
   allUsers,
   chats,
-  mutateChats,
 }) => {
-  const { data: session } = useSession();
-
   const activeTab = useSelector((store: ReduxtState) => store.chat.activeTab);
 
-  const wholeChat = useSelector((store: ReduxtState) => store.chat.wholeChat);
-  const startChat = useSelector((store: ReduxtState) => store.chat.startChat);
-  const liveMessages = useSelector(
-    (store: ReduxtState) => store.chat.liveMessages
-  );
   const dispatch = useDispatch<ReduxDispatch>();
   const [serachTerm, setSearchTerm] = useState<string>("");
   const searchRef = useRef<HTMLInputElement>(null);
@@ -79,13 +50,10 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
     <IoCall key="call" size={30} color="purple" />,
     <div key="friendRequest" className="relative">
       <IoIosMail size={30} color="purple" />
-      <div className="absolute rounded-full bg-red-600 w-5 h-5 flex justify-center items-center text-white -top-1 -right-2">
-        {/* {friendRequests?.length ?? data?.length} */}
-      </div>
+      <div className="absolute rounded-full bg-red-600 w-5 h-5 flex justify-center items-center text-white -top-1 -right-2"></div>
     </div>,
   ];
 
-  const [Chats, setChats] = useState<Conversation[]>([]);
   const lastMessages = useSelector(
     (store: ReduxtState) => store.chat.lastMessage
   );
@@ -106,9 +74,6 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
                 {t}
               </span>
             ))}
-            {/* <span>
-              <FaPeopleGroup size={30} color="purple" />
-            </span> */}
             <span onClick={() => dispatch(setActiveTab("Settings"))}>
               <Image
                 src="https://randomuser.me/api/portraits/men/27.jpg"
@@ -159,12 +124,6 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
 
                           {data.firstname + " " + data.lastname}
                         </div>
-                        {/* <Button
-                          variant="windows"
-                          size="xs"
-                          name="+"
-                          onClick={() => PusherListenerPrivate}
-                        ></Button> */}
                       </div>
                     </ul>
                   ))}
@@ -209,22 +168,6 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
                       </div>
                       <div className="flex justify-between items-center ">
                         {/* whitespace-nowrap overflow-hidden text-ellipsis */}
-                        {/* <p className="text-sm text-gray-400 ">
-                          {(() => {
-                            const userId = session?.user._id;
-                            const relevantMessages = wholeChat.filter(
-                              (msg) =>
-                                (msg.senderId === userId &&
-                                  msg.recieverId === friend.otherUserId) ||
-                                (msg.recieverId === userId &&
-                                  msg.senderId === friend.otherUserId)
-                            );
-                            const lastMsg = relevantMessages.at(-1); // get last relevant message
-
-                            return lastMsg?.message || friend.lastMessage;
-                          })()}
-                        </p> */}
-
                         <p className="text-sm text-gray-400">
                           {lastMessages[friend.conversationId] ||
                             friend.lastMessage ||
@@ -243,15 +186,3 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
   );
 };
 export default ChatListPanel;
-// dispatch(setLastMessage());
-// {
-
-//   if(wholeChat){
-//     wholeChat[wholeChat.length - 1]?.recieverId === userid
-//   }
-//   wholeChat
-//     ?  ||
-//       wholeChat[wholeChat.length - 1]?.recieverId === otherid
-//       ? wholeChat[wholeChat.length - 1]?.message
-//       : friend.lastMessage
-//     : liveMessages && liveMessages[liveMessages.length - 1].message;

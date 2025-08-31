@@ -6,14 +6,12 @@ import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import { MdKeyboardBackspace } from "react-icons/md";
 
-import { Session } from "next-auth";
 import SignOutButton_ClientSide from "@/src/lib/Components/Basic/SignOutButton_ClientSide";
 import Button from "@/src/lib/Components/Basic/Button";
 const ChatSettings = () => {
   const settingAT = useSelector(
     (store: ReduxtState) => store.chat.settingsActiveTab
   );
-  const { data: session } = useSession();
   const activeTabStyle =
     "flex transition-all duration-200 bg-red-500 px-0.5 -left-2 rounded-2xl h-1/2 absolute top-1/2 -translate-y-1/2";
   const dispatch = useDispatch<ReduxDispatch>();

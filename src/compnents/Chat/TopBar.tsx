@@ -1,5 +1,4 @@
 import React from "react";
-import Image from "next/image";
 const TopBar = () => {
     return (
         <div className="fixed z-900 w-full  overflow-hidden justify-center items-center">

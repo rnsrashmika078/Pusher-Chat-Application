@@ -23,7 +23,7 @@ type MessageType = {
 export default function PusherListenerPresence({
   user_id,
 }: {
-  user_id: string | null;
+  user_id: string | undefined;
 }) {
   // const [onlineUsers, setOnlineUsers] = useState<Member[]>([]);
   const dispatch = useDispatch<ReduxDispatch>();
