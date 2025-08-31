@@ -214,14 +214,7 @@ const MessageArea = ({ useFor, mutateChats, chats }: MessageProps) => {
             <div>
               <h1 className="font-bold">
                 {
-                  // currentChat
-                  //   ? (startChat?.firstName ?? chat.chatWith?.firstname) +
-                  //     " " +
-                  //     (startChat?.lastName ?? chat.chatWith?.lastname)
-                  //   : (startChat?.firstName ?? chat.chatWith?.firstname) +
-                  //     " " +
-                  //     (startChat?.lastName ?? chat.chatWith?.lastname)
-
+   
                   (startChat?.firstName ?? chat.chatWith?.firstname) +
                     " " +
                     (startChat?.lastName ?? chat.chatWith?.lastname)
