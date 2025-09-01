@@ -48,6 +48,7 @@ export interface Conversation {
   otherUserFname: string;
   otherUserLName: string;
   lastMessage?: string;
+  status?: "sent" | "delivered" | "seen";
 }
 
 export interface Chat {
@@ -56,7 +57,7 @@ export interface Chat {
   recieverId: string;
   message: string;
   status?: string;
-  createdAt?: string;
+  createdAt?: Date;
   saved?: boolean;
 }
 export interface StartChat {

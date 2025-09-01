@@ -1,28 +1,29 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { JSX, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
 import Button from "@/src/lib/Components/Basic/Button";
-import { IoCall } from "react-icons/io5";
+import { IoCall, IoCheckmarkDoneSharp } from "react-icons/io5";
 import { IoMdMore } from "react-icons/io";
 import { IoSend } from "react-icons/io5";
 import { FaVideo } from "react-icons/fa";
 import { AddFriendServerAction } from "@/src/server_side/actions/FriendServerAction";
-import  { KeyedMutator } from "swr";
+import { KeyedMutator } from "swr";
 import { useSession } from "next-auth/react";
-import { Chat,  StartChat } from "@/interface/Types";
+import { Chat, StartChat } from "@/interface/Types";
 import {
   getChatHistory,
+  updateMessageStatus,
 } from "@/src/server_side/actions/ChatHistoryServerAction";
 import {
   clearLiveMessages,
+  setSeenMessageStatus,
   setWholeChat,
 } from "@/src/redux/chatSlicer";
 import { setLastMessage } from "@/src/redux/chatSlicer";
-import {
-  getLastSeen,
-} from "@/src/server_side/actions/UserLastSeenServerAction";
+import { getLastSeen } from "@/src/server_side/actions/UserLastSeenServerAction";
+import { useInView } from "framer-motion";
 
 interface MessageProps {
   useFor: "AI" | "Chat";
@@ -31,13 +32,32 @@ interface MessageProps {
   >;
 }
 
-const MessageArea = ({ useFor, mutateChats}: MessageProps) => {
+const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
+  const viewRef = useRef<HTMLDivElement | null>(null);
+  const isInView = useInView(viewRef, {
+    // rootMargin: "-10% 0px -10% 0px",
+    // once: false,  set to true if you only want to trigger once
+  });
   //Redux Global States
   const chat = useSelector((store: ReduxtState) => store.chat);
   const liveMessages = useSelector(
     (store: ReduxtState) => store.chat.liveMessages
   );
   const startChat = useSelector((store: ReduxtState) => store.chat.startChat);
+  const onlineUsers = useSelector(
+    (store: ReduxtState) => store.chat.onlineUsers
+  );
+
+  const [checkOnline, setCheckOnline] = useState<boolean>(
+    onlineUsers.some((user) => user.id === startChat?.recieverId)
+  );
+  const [currentChat, setCurrentChat] = useState<StartChat | null>(null);
+
+  const seenMessageStatus = useSelector(
+    (store: ReduxtState) => store.chat.seenMessageStatus
+  );
+
+  const [lastSeen, setLastSeen] = useState<Date>();
 
   //React Local States
   const [typeMessage, setTypeMessage] = useState<string>("");
@@ -49,28 +69,54 @@ const MessageArea = ({ useFor, mutateChats}: MessageProps) => {
   const { data: session } = useSession();
 
   const dispatch = useDispatch<ReduxDispatch>();
+  const [isSeen, setIsSeen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (
+      isInView &&
+      !isSeen &&
+      messages[messages.length - 1]?.senderId !== session?.user._id
+    ) {
+      handleupdateMessageStatus();
+    }
+  }, [isInView, messages.length]);
   useEffect(() => {
     dispatch(clearLiveMessages());
+    setMessages([]);
     const getAllMessage = async () => {
       const result = await getChatHistory(
-        session?.user._id,
-        startChat?.id ?? ""
+        chat.chatWith?.userId ?? startChat?.id
       );
-      if (result) setMessages(result.data ?? []);
+      if (result) {
+        setMessages(result.data ?? []);
+        updateWholeChatState(result.data ?? []);
+      }
     };
     getAllMessage();
-  }, [dispatch, session?.user._id, startChat]);
+  }, [dispatch, session?.user._id, startChat?.id, chat.chatWith?.userId]);
 
   useEffect(() => {
-    setMessages((prev) => [...prev, ...liveMessages]);
+    setIsSeen(false);
+    dispatch(setSeenMessageStatus(null));
+
+    if (liveMessages.length > 0) {
+      const liveMessage = liveMessages[liveMessages.length - 1];
+      if (liveMessage.conversationId === startChat?.id) {
+        setMessages((prev) => [...prev, liveMessage]);
+      }
+      updateWholeChatState([liveMessage]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveMessages]);
 
-  useEffect(() => {
-    if (messages?.length > 0) {
-      dispatch(setWholeChat(messages));
+  useEffect(() => {}, [messages, dispatch]);
+
+  const updateWholeChatState = (msg: Chat[]) => {
+    if (msg?.length > 0) {
+      dispatch(setWholeChat(msg));
 
       // set last message for this conversation
-      const last = messages.at(-1);
+      const last = msg.at(-1);
       if (last) {
         dispatch(
           setLastMessage({
@@ -80,9 +126,8 @@ const MessageArea = ({ useFor, mutateChats}: MessageProps) => {
         );
       }
     }
-  }, [messages, dispatch]);
+  };
 
-  const [currentChat, setCurrentChat] = useState<StartChat | null>(null);
   async function handleAddFriend() {
     const formdata = new FormData();
     if (chat && session) {
@@ -98,10 +143,12 @@ const MessageArea = ({ useFor, mutateChats}: MessageProps) => {
       formdata.append("userLname", session?.user?.lastname ?? "");
       formdata.append("otherUserFname", chat.chatWith?.firstname ?? "");
       formdata.append("otherUserLName", chat.chatWith?.lastname ?? "");
+      formdata.append("otherUserLName", chat.chatWith?.lastname ?? "");
       formdata.append(
         "lastMessage",
         messages[messages.length - 1]?.message ?? ""
       );
+      formdata.append("status", messages[messages.length - 1]?.status ?? "");
     }
 
     setCurrentChat({
@@ -116,56 +163,6 @@ const MessageArea = ({ useFor, mutateChats}: MessageProps) => {
     } else {
     }
   }
-
-  //for send message -> pusher and store message on db
-  const sendMessage = async () => {
-    if ((currentChat || startChat) && session) {
-      const userMessage: Chat = {
-        conversationId: startChat?.id ?? currentChat?.id ?? "",
-        senderId: session?.user._id ?? "",
-        recieverId: startChat?.recieverId ?? currentChat?.recieverId ?? "",
-        message: typeMessage ?? "",
-        createdAt: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, userMessage]);
-
-      try {
-        setTypeMessage("");
-        const res = await fetch("/api/presence-message", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            conversationId: startChat?.id ?? currentChat?.id ?? "",
-            recieverId: startChat?.recieverId ?? currentChat?.recieverId ?? "",
-            userFname: startChat?.firstName ?? currentChat?.firstName ?? "",
-            userLname: startChat?.lastName ?? "",
-            senderId: session?.user._id,
-            message: typeMessage ?? "",
-            lastMessage: typeMessage ?? "",
-            status: "sent",
-            createdAt: new Date().toISOString(),
-          }),
-        });
-        if (!res.ok) {
-          console.error("Failed to send friend request:", await res.json());
-        }
-      } catch (error) {
-        console.error("Error sending friend request:", error);
-      }
-    }
-  };
-
-  const onlineUsers = useSelector(
-    (store: ReduxtState) => store.chat.onlineUsers
-  );
-
-
-  const [checkOnline, setCheckOnline] = useState<boolean>(
-    onlineUsers.some((user) => user.id === startChat?.recieverId)
-  );
-
-  const [lastSeen, setLastSeen] = useState<Date>();
-
   useEffect(() => {
     const handleUpdateLastSeen = async () => {
       const isOnline = onlineUsers.some(
@@ -186,14 +183,109 @@ const MessageArea = ({ useFor, mutateChats}: MessageProps) => {
       }
     };
 
-    handleUpdateLastSeen(); // ✅ actually call it
+    handleUpdateLastSeen();
   }, [onlineUsers, startChat?.recieverId, session?.user._id]);
+
+  const sendMessage = async () => {
+    const isOnline = onlineUsers.some(
+      (user) => user.id === startChat?.recieverId
+    );
+
+    setIsSeen(false);
+    if ((currentChat || startChat) && session) {
+      const userMessage: Chat = {
+        conversationId: startChat?.id ?? currentChat?.id ?? "",
+        senderId: session?.user._id ?? "",
+        recieverId: startChat?.recieverId ?? currentChat?.recieverId ?? "",
+        message: typeMessage ?? "",
+        createdAt: new Date(),
+        status: isOnline ? "delivered" : "sent",
+      };
+      setMessages((prev) => [...prev, userMessage]);
+      updateWholeChatState([userMessage]);
+      try {
+        setTypeMessage("");
+        const res = await fetch("/api/presence-message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            conversationId: startChat?.id ?? currentChat?.id ?? "",
+            recieverId: startChat?.recieverId ?? currentChat?.recieverId ?? "",
+            userFname: startChat?.firstName ?? currentChat?.firstName ?? "",
+            userLname: startChat?.lastName ?? "",
+            senderId: session?.user._id,
+            message: typeMessage ?? "",
+            lastMessage: typeMessage ?? "",
+            status: isOnline ? "delivered" : "sent",
+            createdAt: new Date(),
+          }),
+        });
+        if (!res.ok) {
+          console.error("Failed to send friend request:", await res.json());
+        }
+      } catch (error) {
+        console.error("Error sending friend request:", error);
+      }
+    }
+  };
+
+  const handleupdateMessageStatus = (status?: string) => {
+    const lastMessage = messages[messages.length - 1];
+    const convoId = messages[messages.length - 1]?.conversationId;
+    if (convoId) {
+      const update = async () => {
+        if (!status) {
+          try {
+            await fetch("/api/message-seen", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                conversationId: convoId,
+                senderId: lastMessage.senderId,
+                messageId: lastMessage.recieverId,
+              }),
+            });
+
+            setIsSeen(true);
+          } catch (error) {
+            console.error("Error sending seen notification:", error);
+          }
+        } else {
+          await updateMessageStatus(convoId, "delivered");
+        }
+      };
+      update();
+    }
+  };
+
+  useEffect(() => {
+    if (seenMessageStatus) {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.status !== "seen" ? { ...msg, status: "seen" } : msg
+        )
+      );
+    }
+  }, [seenMessageStatus]);
+
+  useEffect(() => {
+    setMessages([]);
+  }, [chat.chatWith?.firstname, startChat?.firstName]);
+
+  type MessageStatus = "sent" | "delivered" | "seen";
+
+  const status: Record<MessageStatus, JSX.Element> = {
+    sent: <IoCheckmarkDoneSharp />,
+    delivered: <IoCheckmarkDoneSharp />,
+    seen: <IoCheckmarkDoneSharp color="blue" />,
+  };
 
   return (
     <div className="flex flex-col w-full h-full select-none">
       {/* Header */}
-
-      <div className="flex justify-between items-center p-5 py-6 shadow-xs bg-white border-b border-gray-200 sticky  z-10">
+      <div className="  top-0 flex justify-between items-center p-5 py-6 shadow-xs bg-white border-b border-gray-200 sticky  z-10">
         <div className="flex gap-3 items-center">
           {useFor === "Chat" && (
             <Image
@@ -205,11 +297,11 @@ const MessageArea = ({ useFor, mutateChats}: MessageProps) => {
             />
           )}
           {useFor === "Chat" ? (
-            <div>
+            <div className="">
               <h1 className="font-bold">
-                {(startChat?.firstName ?? chat.chatWith?.firstname) +
+                {(chat.chatWith?.firstname ?? startChat?.firstName) +
                   " " +
-                  (startChat?.lastName ?? chat.chatWith?.lastname)}
+                  (chat.chatWith?.lastname ?? startChat?.lastName)}
               </h1>
               <p className="text-sm text-gray-400">
                 {checkOnline
@@ -284,7 +376,7 @@ const MessageArea = ({ useFor, mutateChats}: MessageProps) => {
           </div>
         )}
         {/* )} */}
-        {...messages.map((user, i) => (
+        {messages.map((user, i) => (
           <div
             key={i}
             className={`mb-2 flex ${
@@ -297,19 +389,30 @@ const MessageArea = ({ useFor, mutateChats}: MessageProps) => {
               className={`flex justify-center items-end gap-2 max-w-[75%] px-4 py-2  text-sm shadow-sm ${
                 user.senderId === session?.user._id
                   ? " bg-gradient-to-r from-purple-600 to-purple-400 rounded-bl-2xl"
-                  : " bg-gradient-to-r from-blue-600 to-blue-300 rounded-br-2xl"
+                  : // : " bg-gradient-to-r from-red-700 to-gray-900 rounded-br-2xl"
+                    " bg-gradient-to-r from-blue-600 to-blue-300 rounded-br-2xl"
               }`}
             >
               <span className={`text-sm text-white`}>{user.message}</span>
+              <span className={`text-sm text-white`}>
+                {(user.senderId === session?.user._id &&
+                  user.status &&
+                  status[user.status as MessageStatus]) ??
+                  null}
+              </span>
               {/* message created time -> send time  */}
               <span className="text-[10px] text-gray-200 font-extralight">
-                {user.createdAt?.split("T")[1].split("Z")[0].slice(0, 5)}
+                {user.createdAt &&
+                  new Date(user.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
               </span>
             </div>
           </div>
         ))}
       </div>
-
+      <div className="flex justify-center items-center" ref={viewRef}></div>
       {/* Input bar */}
       <div className="flex items-center gap-4 p-4 bg-white border-t border-gray-200 sticky bottom-0 z-20">
         <input

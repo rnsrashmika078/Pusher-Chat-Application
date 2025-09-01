@@ -7,7 +7,7 @@ import { User } from "@/interface/Types";
 import { RxCross1 } from "react-icons/rx";
 import { useSession } from "next-auth/react";
 import Button from "@/src/lib/Components/Basic/Button";
-import { setChatWith } from "@/src/redux/chatSlicer";
+import { setChatWith, setStartChat } from "@/src/redux/chatSlicer";
 import { useDispatch } from "react-redux";
 import { ReduxDispatch } from "@/src/redux/store";
 
@@ -123,7 +123,7 @@ const AddFriend: React.FC<AddFriendProps> = ({ allUsers, setVisibility }) => {
 
                       <Button
                         name="Send Message"
-                        onClick={() =>
+                        onClick={() => {
                           dispatch(
                             setChatWith({
                               userId: user._id!,
@@ -133,9 +133,11 @@ const AddFriend: React.FC<AddFriendProps> = ({ allUsers, setVisibility }) => {
                               profileimage: user.profileImage!,
                               lastMessage: "",
                               username: user.username!,
+                              
                             })
-                          )
-                        }
+                          );
+                          dispatch(setStartChat(null));
+                        }}
                       ></Button>
                     </div>
                   </ul>

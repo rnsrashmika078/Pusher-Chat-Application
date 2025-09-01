@@ -2,10 +2,7 @@
 import connectDB from "../backend/lib/connectDB";
 import Conversation from "../backend/models/Conversation";
 import Message from "../backend/models/Message";
-export async function getChatHistory(
-  userid: string | undefined,
-  conversationId?: string | undefined
-) {
+export async function getChatHistory(conversationId?: string | undefined) {
   try {
     await connectDB();
 
@@ -23,10 +20,7 @@ export async function getChatHistory(
     };
   }
 }
-export async function getChats(
-  senderId: string,
-) {
-
+export async function getChats(senderId: string) {
   try {
     await connectDB();
     let conversations = null;
@@ -39,12 +33,13 @@ export async function getChats(
         const lastMsg = await Message.findOne({
           conversationId: conv.conversationId,
         })
-          .sort({ createdAt: -1 }) 
-          .select("lastMessage");
+          .sort({ createdAt: -1 })
+          .select("lastMessage status");
 
         return {
-          ...conv.toObject(), 
+          ...conv.toObject(),
           lastMessage: lastMsg?.lastMessage || null,
+          status: lastMsg?.status || null,
         };
       })
     );
@@ -55,6 +50,31 @@ export async function getChats(
     return {
       data: [],
       error: error,
+    };
+  }
+}
+export async function updateMessageStatus(
+  convoId: string,
+  status: "sent" | "delivered" | "seen"
+) {
+  console.log("status", status);
+  try {
+    await connectDB();
+
+    const result = await Message.updateMany(
+      { conversationId: convoId },
+      { $set: { status } }
+    );
+
+    if (result.modifiedCount === 0) {
+      return { message: "No messages updated" };
+    }
+
+    return { message: `Messages updated to ${status}` };
+  } catch (error) {
+    return {
+      message: "Error while processing",
+      error,
     };
   }
 }

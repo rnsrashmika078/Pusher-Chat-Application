@@ -42,7 +42,6 @@ export async function POST(req: Request) {
       lastMessage,
       status,
     });
-    console.log("Message data", newMessage);
 
     await newMessage.save();
     // 4️⃣ Trigger Pusher for real-time updates

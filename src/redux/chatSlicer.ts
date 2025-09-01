@@ -1,22 +1,30 @@
 "use client";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Chat, Friend, Member, StartChat } from "@/interface/Types";
+import { Channel } from "pusher-js";
 
 type LastMessageState = {
   [conversationId: string]: string;
+};
+type SeenMessage = {
+  messageId: string;
+  conversationId: string;
+  seen: boolean;
 };
 
 interface PostState {
   ws: WebSocket | null;
   startChat: StartChat | null;
+  seenMessageStatus: SeenMessage | null;
   activeTab: string;
   settingsActiveTab: string;
   liveMessages: Chat[];
   createdAt?: string;
   wholeChat: Chat[];
-  lastMessage: LastMessageState; // ✅ object, not array
+  lastMessage: LastMessageState;
   chatWith: Friend | null;
   onlineUsers: Member[];
+  pusherChannel: Channel | null;
 }
 
 const initialState: PostState = {
@@ -26,19 +34,21 @@ const initialState: PostState = {
   settingsActiveTab: "General",
   liveMessages: [],
   wholeChat: [],
-  lastMessage: {}, // ✅ empty object
+  lastMessage: {},
   startChat: null,
   onlineUsers: [],
+  pusherChannel: null,
+  seenMessageStatus: null,
 };
 
 const chatSlicer = createSlice({
   name: "chatSlicer",
   initialState,
   reducers: {
-    setStartChat: (state, action: PayloadAction<StartChat>) => {
+    setStartChat: (state, action: PayloadAction<StartChat | null>) => {
       state.startChat = action.payload;
     },
-    setChatWith: (state, action: PayloadAction<Friend>) => {
+    setChatWith: (state, action: PayloadAction<Friend | null>) => {
       state.chatWith = action.payload;
     },
     setActiveTab: (state, action: PayloadAction<string>) => {
@@ -53,14 +63,18 @@ const chatSlicer = createSlice({
     setLiveMessages: (state, action: PayloadAction<Chat>) => {
       state.liveMessages.push(action.payload);
     },
+    setSeenMessageStatus: (
+      state,
+      action: PayloadAction<SeenMessage | null>
+    ) => {
+      state.seenMessageStatus = action.payload;
+    },
     clearLiveMessages: (state) => {
       state.liveMessages = [];
     },
     setWholeChat: (state, action: PayloadAction<Chat[]>) => {
       state.wholeChat = action.payload;
     },
-
-    // ✅ Fix lastMessage handling
     setLastMessage: (
       state,
       action: PayloadAction<{ conversationId: string; message: string }>
@@ -72,6 +86,9 @@ const chatSlicer = createSlice({
       state.onlineUsers = action.payload;
     },
     // presence channel
+    setPusherChannel: (state, action: PayloadAction<Channel>) => {
+      state.pusherChannel = action.payload;
+    },
     joinedUser: (state, action: PayloadAction<Member>) => {
       const exist = state.onlineUsers.some(
         (user) => user.id === action.payload.id
@@ -96,8 +113,10 @@ export const {
   setLiveMessages,
   clearLiveMessages,
   setWholeChat,
+  setSeenMessageStatus,
   setChatWith,
   setLastMessage,
+  setPusherChannel,
   joinedUser,
   setOnlineUsers,
   leftUser,

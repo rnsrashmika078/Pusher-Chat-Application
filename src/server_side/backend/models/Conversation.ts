@@ -36,6 +36,11 @@ const ConversationSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    status: {
+      type: String,
+      enum: ["sent", "delivered", "seen"],
+      default: "sent",
+    },
   },
   { timestamps: true }
 );

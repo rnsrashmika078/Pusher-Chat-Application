@@ -1,14 +1,18 @@
 "use client";
-import { setActiveTab, setStartChat } from "@/src/redux/chatSlicer";
+import {
+  setActiveTab,
+  setChatWith,
+  setStartChat,
+} from "@/src/redux/chatSlicer";
 import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
 import { IoIosMail } from "react-icons/io";
-import { IoCall } from "react-icons/io5";
+import { IoCall, IoCheckmarkDoneSharp } from "react-icons/io5";
 import { RiChat2Fill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import { Conversation, User } from "@/interface/Types";
 import SearchArea from "@/src/lib/Components/Basic/SearchArea";
-import { useRef, useState } from "react";
+import { JSX, useRef, useState } from "react";
 import { useDebounce } from "@/src/hooks/useDebounce";
 
 import ShowNotification from "./Notification/ShowNotification";
@@ -24,6 +28,7 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
   chats,
 }) => {
   const activeTab = useSelector((store: ReduxtState) => store.chat.activeTab);
+  const startChat = useSelector((store: ReduxtState) => store.chat.startChat);
 
   const dispatch = useDispatch<ReduxDispatch>();
   const [serachTerm, setSearchTerm] = useState<string>("");
@@ -57,7 +62,15 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
   const lastMessages = useSelector(
     (store: ReduxtState) => store.chat.lastMessage
   );
+  type MessageStatus = "sent" | "delivered" | "seen";
 
+  const status: Record<MessageStatus, JSX.Element> = {
+    sent: <IoCheckmarkDoneSharp />,
+    delivered: <IoCheckmarkDoneSharp />,
+    seen: <IoCheckmarkDoneSharp color="blue" />,
+  };
+
+  console.log("CHATS", chats);
   return (
     <div className="relative w-full select-none border-r border-gray-200 shadow-sm">
       {!toggle && (
@@ -148,6 +161,7 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
                           recieverId: friend.otherUserId,
                         })
                       );
+                      dispatch(setChatWith(null));
                     }}
                   >
                     <Image
@@ -160,19 +174,23 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
                     <div className="w-full">
                       <div className="flex justify-between items-center ">
                         <h1 className="font-bold">
-                          {friend.otherUserFname + friend.otherUserLName}
+                          {friend.otherUserFname + " " + friend.otherUserLName}
                         </h1>
                         <p className="text-xs text-gray-400 ">
                           {/* {friend.recievedtime} */}
                         </p>
                       </div>
                       <div className="flex justify-between items-center ">
-                        {/* whitespace-nowrap overflow-hidden text-ellipsis */}
-                        <p className="text-sm text-gray-400">
-                          {lastMessages[friend.conversationId] ||
-                            friend.lastMessage ||
-                            "No messages yet"}
-                        </p>
+                        <div className="flex justify-center items-center gap-1">
+                          <p>{status[friend.status as MessageStatus]}</p>
+                          {/* whitespace-nowrap overflow-hidden text-ellipsis */}
+                          <p className="text-sm text-gray-400">
+                            {lastMessages[friend.conversationId] ||
+                              friend.lastMessage ||
+                              "No messages yet"}
+                          </p>
+                        </div>
+
                         <p className="flex justify-center items-center text-white text-sm bg-green-500 w-5 h-5 p-2 rounded-full"></p>
                       </div>
                     </div>

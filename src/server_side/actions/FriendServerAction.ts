@@ -12,6 +12,7 @@ export async function AddFriendServerAction(formData: FormData) {
     const otherUserFname = formData.get("otherUserFname") as string;
     const otherUserLName = formData.get("otherUserLName") as string;
     const lastMessage = (formData.get("lastMessage") as string) || null;
+    const status = (formData.get("status") as string) || null;
 
     const existConvo = await Conversation.find({
       conversationId: conversationId,
@@ -29,6 +30,7 @@ export async function AddFriendServerAction(formData: FormData) {
       otherUserFname,
       otherUserLName,
       lastMessage,
+      status,
     });
     const newConversation2 = new Conversation({
       conversationId,
@@ -39,6 +41,7 @@ export async function AddFriendServerAction(formData: FormData) {
       userFname: otherUserFname,
       userLname: otherUserLName,
       lastMessage,
+      status,
     });
     await newConversation.save();
     await newConversation2.save();
