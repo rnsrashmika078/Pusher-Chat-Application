@@ -5,30 +5,32 @@ import {
   setStartChat,
 } from "@/src/redux/chatSlicer";
 import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
-import { IoIosMail } from "react-icons/io";
 import { IoCall, IoCheckmarkDoneSharp } from "react-icons/io5";
-import { RiChat2Fill } from "react-icons/ri";
+import { RiChat2Fill, RiLoader2Fill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import { Conversation, User } from "@/interface/Types";
 import SearchArea from "@/src/lib/Components/Basic/SearchArea";
-import { JSX, useRef, useState } from "react";
+import { JSX, useEffect, useRef, useState } from "react";
 import { useDebounce } from "@/src/hooks/useDebounce";
-
 import ShowNotification from "./Notification/ShowNotification";
+import { useSession } from "next-auth/react";
 
 interface ChatListLayoutProps {
   allUsers?: User[];
   toggle: boolean;
+  isLoading: boolean;
   chats: Conversation[];
 }
 const ChatListPanel: React.FC<ChatListLayoutProps> = ({
   toggle,
+  isLoading,
   allUsers,
   chats,
 }) => {
+  const { data: session } = useSession();
   const activeTab = useSelector((store: ReduxtState) => store.chat.activeTab);
-  const startChat = useSelector((store: ReduxtState) => store.chat.startChat);
+  const [mainTab, setMainTab] = useState<string>("Message");
 
   const dispatch = useDispatch<ReduxDispatch>();
   const [serachTerm, setSearchTerm] = useState<string>("");
@@ -47,16 +49,14 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
         user.lastname.toLowerCase().includes(serachTerm.toLowerCase()))
   );
 
-  const [mainTab, setMainTab] = useState<string>("Message");
-
   const tabNames = ["Message", "Call", "FriendRequest"];
   const Tabs = [
     <RiChat2Fill key="Message" size={30} color="purple" />,
     <IoCall key="call" size={30} color="purple" />,
-    <div key="friendRequest" className="relative">
-      <IoIosMail size={30} color="purple" />
-      <div className="absolute rounded-full bg-red-600 w-5 h-5 flex justify-center items-center text-white -top-1 -right-2"></div>
-    </div>,
+    // <div key="friendRequest" className="relative">
+    //   <IoIosMail size={30} color="purple" />
+    //   <div className="absolute rounded-full bg-red-600 w-5 h-5 flex justify-center items-center text-white -top-1 -right-2"></div>
+    // </div>,
   ];
 
   const lastMessages = useSelector(
@@ -69,18 +69,56 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
     delivered: <IoCheckmarkDoneSharp />,
     seen: <IoCheckmarkDoneSharp color="blue" />,
   };
+  const [unseenCount, setUnseenCount] = useState<
+    {
+      id: string;
+      user: string;
+      count: number;
+    }[]
+  >([]);
+  const [step, setStep] = useState<number>(0);
 
-  console.log("CHATS", chats);
+  useEffect(() => {
+    chats.map((ch) => {
+      setStep(step + 1);
+      if (ch?.status === "seen") {
+        setUnseenCount((prev) =>
+          prev.filter((item) => item.id !== ch?.otherUserId)
+        );
+      } else {
+        setUnseenCount((prev) => {
+          const existing = prev.find(
+            (item) =>
+              item.id === ch?.otherUserId && item.id !== session?.user._id
+          );
+          if (existing) {
+            return prev.map((item) =>
+              item.id === ch?.otherUserId && item.id !== session?.user._id
+                ? { ...item, count: item.count + 1 }
+                : item
+            );
+          } else {
+            return [
+              ...prev,
+              { id: ch?.otherUserId, user: ch?.otherUserFname, count: 1 },
+            ];
+          }
+        });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chats]);
+
   return (
-    <div className="relative w-full select-none border-r border-gray-200 shadow-sm">
+    <div className="relative w-full select-none border-r  border-[var(--border)] ">
       {!toggle && (
         <div>
-          <div className="flex justify-between shadow-sm p-15 bg-white py-0 ">
+          <div className="flex justify-between shadow-sm p-15 bg-[var(--background)]  py-2 border-b border-[var(--border)]">
             {Tabs.map((t, index) => (
               <span
                 key={tabNames[index]}
                 className={`cursor-pointer p-2 ${
-                  mainTab === tabNames[index] ? "bg-gray-200" : ""
+                  mainTab === tabNames[index] ? "bg-[var(--active-tab-color)]" : ""
                 }`}
                 onClick={() => setMainTab(tabNames[index])}
               >
@@ -98,25 +136,26 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
             </span>
           </div>
 
-          <div className=" sticky  bg-white p-5 shadow-sm mt-1">
+          <div className=" sticky bg-[var(--shadow-background)] p-3 shadow-sm">
             <h1 className="text-4xl font-bold mb-2">{activeTab || "Chat"}</h1>
             <>
-              <div className="flex gap-2 p-2 text-xs font-bold justify-start items-start">
+              {/* <div className="flex gap-2 p-2 text-xs font-bold justify-start items-start">
                 <p>DIRECT</p>
                 <span className="bg-red-500 p-1 w-1 h-1 rounded-full"></span>
                 <p className="text-gray-300">GROUP</p>
                 <span className="bg-red-500 p-1 w-1 h-1 rounded-full"></span>
                 <p className="text-gray-300">PUBLIC</p>
                 <span className="bg-red-500 p-1 w-1 h-1 rounded-full"></span>
-              </div>
+              </div> */}
               <SearchArea
                 ref={searchRef}
+                placeholder="Search Chats"
                 onChange={(e) => handleSearch(e.target.value)}
               />
               <div
                 className={`${
                   serachTerm !== "" &&
-                  "shadow-xs border z-[-1] border-gray-200 absolute p-5 py-8 space-y-2 top-30 rounded-b-2xl bg-white w-[calc(100%-40px)] overflow-y-auto scrollbar-hidden"
+                  "shadow-xs border z-[-1] border-[var(--border)]  absolute p-5 py-8 space-y-2 top-30 rounded-b-2xl bg-[var(--background)] w-[calc(100%-40px)] overflow-y-auto scrollbar-hidden"
                 }`}
               >
                 {serachTerm !== "" &&
@@ -132,9 +171,8 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
                             alt="profile"
                             width={25}
                             height={25}
-                            className="rounded-full object-cover w-6 h-6 border border-gray-300 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-105 transform active:scale-95"
+                            className="rounded-full object-cover w-6 h-6 border border-[var(--border)] shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-105 transform active:scale-95"
                           />
-
                           {data.firstname + " " + data.lastname}
                         </div>
                       </div>
@@ -145,14 +183,17 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
           </div>
           {mainTab === "FriendRequest" && <ShowNotification />}
 
+          {/* friends chat inboxes */}
           {activeTab !== "Settings" && mainTab === "Message" ? (
-            <div className="p-5">
-              {chats &&
+            <div className="relative p-5">
+              {!isLoading ? (
+                chats &&
                 chats?.map((friend: Conversation, index: number) => (
                   <div
                     key={index}
-                    className="flex gap-3 mt-2 bg-white p-3 rounded-2xl shadow-sm"
+                    className="flex gap-3 mt-2 bg-[var(--card-background)] p-3 rounded-2xl shadow-sm"
                     onClick={() => {
+                      alert(friend.conversationId);
                       dispatch(
                         setStartChat({
                           id: friend.conversationId!,
@@ -190,12 +231,31 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
                               "No messages yet"}
                           </p>
                         </div>
+                        {(() => {
+                          const unseen = unseenCount.find(
+                            (u) => u.id === friend.otherUserId
+                          );
 
-                        <p className="flex justify-center items-center text-white text-sm bg-green-500 w-5 h-5 p-2 rounded-full"></p>
+                          if (unseen && unseen.id !== session?.user?._id) {
+                            return (
+                              <span
+                                className={`flex justify-center items-center text-[var(--background)] text-sm bg-green-500 w-5 h-5 p-2 rounded-full`}
+                              >
+                                {step === 0 ? unseen.count - 1 : unseen.count}
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
                     </div>
                   </div>
-                ))}
+                ))
+              ) : (
+                <div className="absolute left-1/2 top-5 animate-spin">
+                  <RiLoader2Fill size={25} />
+                </div>
+              )}
             </div>
           ) : null}
         </div>

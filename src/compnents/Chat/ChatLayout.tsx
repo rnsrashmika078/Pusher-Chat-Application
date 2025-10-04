@@ -19,10 +19,12 @@ interface LayoutProps {
 const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
   const { data: session } = useSession();
   const [width, setWidth] = useState(0);
+
   const [toggle, setToggle] = useState<boolean>(false);
   const startChat = useSelector((store: ReduxtState) => store.chat.startChat);
   const chatWith = useSelector((store: ReduxtState) => store.chat.chatWith);
   const activeTab = useSelector((store: ReduxtState) => store.chat.activeTab);
+  // const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => {
     if (typeof window !== "undefined") {
       const handleResize = () => setWidth(window.innerWidth);
@@ -70,24 +72,26 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
         liveMessages[liveMessages.length - 1]?.conversationId,
       ];
 
-  const { data: chats, mutate } = useSWR(field, getChats, {
+  const {
+    data: chats,
+    mutate,
+    isLoading,
+  } = useSWR(field, getChats, {
     // revalidateOnFocus: true, // refetch when window/tab gets focus
-    // revalidateOnReconnect: true, // refetch on reconnect
-    // shouldRetryOnError: false, // don’t
+    // revalidateOnReconnect: true,
+    // shouldRetryOnError: true,
   });
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden border-2 border-t-[var(--border)]  ">
-      <div className="flex flex-1 bg-gray-800 overflow-hidden">
-        {/* <PusherListenerPrivate user_id={session?.user._id} /> */}
+    <div className="bg-[var(--panel-bg-color)] flex h-[calc(100vh-4rem)] overflow-hidden border-2 border-t-[var(--border)]  ">
+      <div className="flex flex-1 overflow-hidden">
         <PusherListenerPresence user_id={session?.user._id} />
         <SidePanel allUsers={allUsers} />
-        {/* This is the only scrollable section */}
         {activeTab === "Settings" ? (
           <div
             className={`overflow-x-hidden flex transition-all duration-100 ease-in-out
   ${toggle ? "w-0" : "w-full"}
-  bg-[var(--panel-bg-color)]    overflow-y-auto scrollbar-hidden  relative  border-r border-[var(--border)] rounded-l-4xl`}
+     overflow-y-auto scrollbar-hidden  relative  border-r border-[var(--border)] rounded-l-4xl`}
           >
             <ChatSettings />
           </div>
@@ -95,11 +99,12 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
           <div
             className={`overflow-x-hidden flex transition-all duration-100 ease-in-out
     ${toggle ? "w-0" : "w-full md:w-1/2 lg:basis-[35%] xl:basis-[30%]  "}
-    bg-[var(--panel-bg-color)]    overflow-y-auto scrollbar-hidden  relative  border-r border-[var(--border)] rounded-l-4xl`}
+        overflow-y-auto scrollbar-hidden  relative  border-r border-[var(--border)] rounded-l-4xl`}
           >
             <ChatListPanel
               toggle={toggle}
               allUsers={allUsers}
+              isLoading={isLoading}
               chats={chats?.data ?? []}
             />
           </div>

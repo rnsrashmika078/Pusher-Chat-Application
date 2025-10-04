@@ -13,7 +13,7 @@ const SearchArea = React.forwardRef<HTMLInputElement, SearchAreaProps>(
         ref={ref}
         placeholder={placeholder}
         {...props}
-        className="mb-2 border shadow-sm rounded-2xl p-2 pl-5 w-full bg-gray-100 border-gray-200"
+        className="text-[var(--foreground)]  border shadow-sm rounded-2xl p-2 pl-5 w-full bg-[var(--background)] border-[#858383]"
       />
     );
   }

@@ -24,6 +24,7 @@ import {
 import { setLastMessage } from "@/src/redux/chatSlicer";
 import { getLastSeen } from "@/src/server_side/actions/UserLastSeenServerAction";
 import { useInView } from "framer-motion";
+import { RiLoader2Fill } from "react-icons/ri";
 
 interface MessageProps {
   useFor: "AI" | "Chat";
@@ -70,6 +71,7 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
 
   const dispatch = useDispatch<ReduxDispatch>();
   const [isSeen, setIsSeen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<"null" | "send" | "retrive">("null");
 
   useEffect(() => {
     if (
@@ -79,8 +81,10 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
     ) {
       handleupdateMessageStatus();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInView, messages.length]);
   useEffect(() => {
+    setLoading("retrive");
     dispatch(clearLiveMessages());
     setMessages([]);
     const getAllMessage = async () => {
@@ -88,11 +92,14 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
         chat.chatWith?.userId ?? startChat?.id
       );
       if (result) {
+        setLoading("null");
         setMessages(result.data ?? []);
         updateWholeChatState(result.data ?? []);
+        return;
       }
     };
     getAllMessage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, session?.user._id, startChat?.id, chat.chatWith?.userId]);
 
   useEffect(() => {
@@ -108,8 +115,6 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveMessages]);
-
-  useEffect(() => {}, [messages, dispatch]);
 
   const updateWholeChatState = (msg: Chat[]) => {
     if (msg?.length > 0) {
@@ -187,10 +192,10 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
   }, [onlineUsers, startChat?.recieverId, session?.user._id]);
 
   const sendMessage = async () => {
+    setLoading("send");
     const isOnline = onlineUsers.some(
       (user) => user.id === startChat?.recieverId
     );
-
     setIsSeen(false);
     if ((currentChat || startChat) && session) {
       const userMessage: Chat = {
@@ -222,9 +227,13 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
         });
         if (!res.ok) {
           console.error("Failed to send friend request:", await res.json());
+          return;
         }
+        setLoading("null");
+        return;
       } catch (error) {
         console.error("Error sending friend request:", error);
+        return;
       }
     }
   };
@@ -275,7 +284,6 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
   }, [chat.chatWith?.firstname, startChat?.firstName]);
 
   type MessageStatus = "sent" | "delivered" | "seen";
-
   const status: Record<MessageStatus, JSX.Element> = {
     sent: <IoCheckmarkDoneSharp />,
     delivered: <IoCheckmarkDoneSharp />,
@@ -285,7 +293,7 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
   return (
     <div className="flex flex-col w-full h-full select-none">
       {/* Header */}
-      <div className="  top-0 flex justify-between items-center p-5 py-6 shadow-xs bg-white border-b border-gray-200 sticky  z-10">
+      <div className="  top-0 flex justify-between items-center p-5 py-6 shadow-xs bg-[var(--background)] border-b border-[var(--border)] sticky  z-10">
         <div className="flex gap-3 items-center">
           {useFor === "Chat" && (
             <Image
@@ -310,7 +318,6 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
                   ? (() => {
                       const ls = new Date(lastSeen);
                       const now = new Date();
-
                       const isToday =
                         ls.getDate() === now.getDate() &&
                         ls.getMonth() === now.getMonth() &&
@@ -355,24 +362,30 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
       {/* Messages */}
       <div className="relative flex-1 px-5 py-3">
         {/* {chat.chatWith?.lastMessage === undefined && !saved && ( */}
-        {messages.length === 0 && (
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-gray-400 mb-3 flex-col inset-0">
-            <div className="flex flex-col justify-center items-center">
-              <span className="text-xl font-semibold text-gray-800">
-                Welcome to the Chat!
-              </span>
-              <span className="text-sm text-gray-600 mt-2">
-                You’re all set to start a conversation.
-              </span>
-              <span className="text-sm text-gray-600"></span>
-              <div className="flex justify-center items-center gap-4 mt-6">
-                <Button
-                  name="Let's Get Chatting"
-                  onClick={handleAddFriend}
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                ></Button>
+        {loading !== "retrive" ? (
+          messages.length === 0 && (
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-gray-400 mb-3 flex-col inset-0">
+              <div className="flex flex-col justify-center items-center">
+                <span className="text-xl font-semibold text-gray-800">
+                  Welcome to the Chat!
+                </span>
+                <span className="text-sm text-gray-600 mt-2">
+                  You’re all set to start a conversation.
+                </span>
+                <span className="text-sm text-gray-600"></span>
+                <div className="flex justify-center items-center gap-4 mt-6">
+                  <Button
+                    name="Let's Get Chatting"
+                    onClick={handleAddFriend}
+                    className="bg-blue-600 text-white hover:bg-blue-700"
+                  ></Button>
+                </div>
               </div>
             </div>
+          )
+        ) : (
+          <div className="absolute left-1/2 top-5 animate-spin">
+            <RiLoader2Fill size={25} />
           </div>
         )}
         {/* )} */}
@@ -414,7 +427,7 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
       </div>
       <div className="flex justify-center items-center" ref={viewRef}></div>
       {/* Input bar */}
-      <div className="flex items-center gap-4 p-4 bg-white border-t border-gray-200 sticky bottom-0 z-20">
+      <div className="flex items-center gap-4 p-4 bg-[var(--search)] border-b border-[var(--border)] border-t sticky bottom-0 z-20">
         <input
           value={typeMessage}
           onChange={(e) => setTypeMessage(e.target.value)}

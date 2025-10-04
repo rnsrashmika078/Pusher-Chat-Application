@@ -14,8 +14,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { ReduxDispatch } from "@/src/redux/store";
 import { setSimpleNotification } from "@/src/redux/NotifySlicer";
+import Spinner from "@/src/lib/Components/Intermediate/Spinner";
 const SignForms: React.FC = () => {
   const [formType, setFormType] = useState<"signIn" | "signUp">("signIn");
+  const [loading, setLoading] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [message, setMessage] = useState<string | null>(null);
   type FormData = SignInData | SignUpData;
@@ -36,6 +38,7 @@ const SignForms: React.FC = () => {
   const router = useRouter();
   const dispatch = useDispatch<ReduxDispatch>();
   const onSubmit = async (data: SignInData | SignUpData) => {
+    setLoading(true);
     if (formType === "signIn") {
       const signInData = data as SignInData;
       const res = await signIn("credentials", {
@@ -46,6 +49,7 @@ const SignForms: React.FC = () => {
       });
       const id = Date.now();
       if (res?.ok) {
+        setLoading(false);
         dispatch(
           setSimpleNotification({
             message: "Successfully Logged in!",
@@ -61,8 +65,8 @@ const SignForms: React.FC = () => {
             id: id,
           })
         );
-        // setMessage("Invalid credentials.Please check the login credentials!");
       }
+      setLoading(false);
       return new Promise((resolve) =>
         setTimeout(() => {
           setMessage(null);
@@ -90,6 +94,7 @@ const SignForms: React.FC = () => {
           reset();
         }
       }
+      setLoading(false);
       return new Promise((resolve) =>
         setTimeout(() => {
           setMessage(null);
@@ -101,7 +106,7 @@ const SignForms: React.FC = () => {
 
   useEffect(() => {
     reset();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formType]);
 
   // Framer motion
@@ -126,6 +131,8 @@ const SignForms: React.FC = () => {
   };
   return (
     <AnimatePresence mode="wait">
+      {loading && <Spinner />}
+
       <motion.div
         key={formType}
         variants={itemVariants}
@@ -134,7 +141,6 @@ const SignForms: React.FC = () => {
         exit="exit"
         className="mt-5 select-none flex border  border-[var(--border)] rounded-2xl justify-center w-11/12 sm:w-[500px] md:w-[500px] p-5 m-auto shadow-sm bg-[var(--card-background)]"
       >
-        {/* <Sonner /> */}
         <div className="flex flex-col gap-1 w-full md:min-w-md">
           <form onSubmit={handleSubmit(onSubmit)}>
             <h1 className="font-bold text-center text-2xl">

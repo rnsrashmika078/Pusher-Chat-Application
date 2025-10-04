@@ -13,7 +13,7 @@ const connectDB = async () => {
       "❌ MongoDB connection failed:",
       err instanceof Error && err.message
     );
-    // Optional: avoid throwing to prevent app crash
+ 
   }
 };
 

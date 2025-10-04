@@ -9,7 +9,7 @@ import {
 import "./globals.css";
 import ClientProvider from "@/src/redux/ClientProvider";
 import NavBar from "@/src/compnents/NavBar/NavBar";
-import Sonner from "@/src/compnents/Sonner/Sonner";
+import Toast from "@/src/compnents/Notifications/Toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,7 +57,7 @@ export default function RootLayout({
       >
         <ClientProvider>
           <NavBar />
-          <Sonner />
+          <Toast/>
           {children}
         </ClientProvider>
       </body>

@@ -19,7 +19,7 @@ const NavBar = () => {
   const navitems = [
     { item: "Home" },
     { item: "Profile" },
-    { item: <GoBell size={20}/> },
+    { item: <GoBell size={20} /> },
     { item: <Theme /> },
   ];
   const itemVariants = {
@@ -41,9 +41,11 @@ const NavBar = () => {
           initial="visible"
           animate={`${!toggle ? "visible" : "hidden"}`}
           exit="exit"
-          className={`italic font-bold ${!toggle ? "opacity-100" : "opacity-0"} text-2xl`}
+          className={` font-bold ${
+            !toggle ? "opacity-100" : "opacity-0"
+          } text-2xl`}
         >
-          AI
+          OzMessenger
         </motion.h1>
       </AnimatePresence>
       <div className="hidden sm:flex justify-between gap-5 items-center">

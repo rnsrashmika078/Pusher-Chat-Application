@@ -20,29 +20,47 @@
   }
 }
 :root {
-  --background: rgb(255, 255, 255);
+  /* --background: rgb(255, 255, 255); */
+    --background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.87),
+    rgb(255, 255, 255)
+  );
   --foreground: rgba(0, 0, 0, 1);
   --card-background: #ffffff;
+  --shadow-background: rgb(255, 255, 255);
   --primary-color: #000000d2;
   --secondary-color: #1d1818a2;
   --label-color: #0000008a;
   --placeholder: #0606066f;
-  --border: #ffffffc2;
+  --border: #ecececc2;
   --input-border: rgba(0, 0, 0, 0.264);
   --sonner-background: #ffffff;
   --mobile-nav: #eaeaeadf;
   --navbar: #ffffff;
   --search: #ffffff;
-  --panel-bg-color: rgb(255, 255, 255);
+ --panel-bg-color: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.429),
+    rgba(255, 255, 255, 0.652)
+  );
   --hover-bg-color: rgba(107, 107, 107, 0.197);
   --button: rgba(220, 219, 219, 0.508);
+  --active-tab-color: rgb(182, 182, 182);
   --list-item: rgb(220, 219, 219);
   --news-heading: rgba(220, 219, 219, 0.479);
 }
 .dark {
-  --background: rgba(0, 0, 0, 0.87);
+  /* --background: rgba(0, 0, 0, 0.87); */
+  --background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.87),
+    rgb(0, 0, 0)
+  );
+
   --foreground: rgb(255, 255, 255);
-  --card-background: #00000016;
+  --shadow-background: rgba(74, 74, 74, 0.111);
+  --card-background: #62626258;
   --primary-color: #ffffffca;
   --secondary-color: #fcfcfc57;
   --label-color: #ffffffca;
@@ -53,12 +71,18 @@
   --mobile-nav: #000000;
   --navbar: #12121273;
   --search: #000000;
-  --panel-bg-color: rgb(0, 0, 0);
+  --panel-bg-color: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.87),
+    rgb(21, 21, 21)
+  );
+  --active-tab-color: rgb(37, 37, 37);
   --hover-bg-color: rgba(61, 61, 61, 0.755);
   --button: rgba(61, 61, 61, 0.755);
   --list-item: rgb(220, 219, 219);
   --news-heading: rgba(0, 0, 0, 0.326);
 }
+
 body {
   background: var(--background);
   /* color: var(--foreground); */
@@ -111,7 +135,6 @@ li {
   animation: gradientMove 4s linear infinite;
   -webkit-text-stroke: 1px #00000088;
 }
-
 
 .Slide-From-Top {
   animation: slide_from_top 0.5s ease-in-out forwards;

@@ -7,8 +7,6 @@ import { FiPlus } from "react-icons/fi";
 import { GrSchedulePlay } from "react-icons/gr";
 import { HiOutlineInboxArrowDown } from "react-icons/hi2";
 import { IoIosSettings } from "react-icons/io";
-import { MdOutlinePresentToAll } from "react-icons/md";
-import { RiDraftFill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import AddFriend from "../AddFriend/AddFriend";
 import { User } from "@/interface/Types";
@@ -21,7 +19,7 @@ const SidePanel: React.FC<SideProps> = ({ allUsers }) => {
 
   const dispatch = useDispatch<ReduxDispatch>();
   return (
-    <div className="select-none transition-all w-12 md:w-auto ">
+    <div className="bg-gray-800 select-none transition-all w-12 md:w-auto ">
       {visibility && (
         <AddFriend allUsers={allUsers} setVisibility={setVisibility} />
       )}
@@ -49,23 +47,23 @@ const SidePanel: React.FC<SideProps> = ({ allUsers }) => {
             count: 5,
           },
           {
-            name: "Starred",
+            name: "Groups",
             icon: <BsBookmarkStar size={20} />,
             color: "bg-red-500",
             count: 3,
           },
-          {
-            name: "Draft",
-            icon: <RiDraftFill size={20} />,
-            color: "bg-green-500",
-            count: 1,
-          },
-          {
-            name: "Sent",
-            icon: <MdOutlinePresentToAll size={20} />,
-            color: "bg-orange-500",
-            count: 7,
-          },
+          // {
+          //   name: "Draft",
+          //   icon: <RiDraftFill size={20} />,
+          //   color: "bg-green-500",
+          //   count: 1,
+          // },
+          // {
+          //   name: "Sent",
+          //   icon: <MdOutlinePresentToAll size={20} />,
+          //   color: "bg-orange-500",
+          //   count: 7,
+          // },
           {
             name: "Settings",
             icon: <IoIosSettings size={20} />,
@@ -86,9 +84,9 @@ const SidePanel: React.FC<SideProps> = ({ allUsers }) => {
           },
         ].map((item, index) => (
           <React.Fragment key={index}>
-            {(index === 5 || index === 0) && (
+            {(index === 3 || index === 0) && (
               <>
-                {index == 5 && (
+                {index == 3 && (
                   <div className="hidden md:flex text-gray-500  flex-col mx-5 mt-10">
                     Future Plans
                   </div>
@@ -100,7 +98,7 @@ const SidePanel: React.FC<SideProps> = ({ allUsers }) => {
             <div
               onClick={() => dispatch(setActiveTab(item.name))}
               className={`${
-                index == 5 ? "mt-2" : "mt-3"
+                index == 3 ? "mt-2" : "mt-3"
               } flex justify-between transition-all duration-300  gap-6  items-center hover:bg-gray-900 p-3 px-4 md:px-8 my-3 rounded-r-full ${
                 activeTab === item.name ? "bg-gray-900" : ""
               }`}
