@@ -5,7 +5,7 @@ import React from "react";
 const page = async () => {
   const session = await getServerSession();
   return (
-    <div className="">
+    <div className="h-screen">
       {!session?.user ? <SignForms /> : redirect("/service/chat")}
     </div>
     // <SignForms />

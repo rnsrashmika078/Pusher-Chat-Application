@@ -139,7 +139,7 @@ const SignForms: React.FC = () => {
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="mt-5 select-none flex border  border-[var(--border)] rounded-2xl justify-center w-11/12 sm:w-[500px] md:w-[500px] p-5 m-auto shadow-sm bg-[var(--card-background)]"
+        className=" mt-5 select-none flex border  border-[var(--border)] rounded-2xl justify-center w-11/12 sm:w-[500px] md:w-[500px] p-5 m-auto shadow-sm bg-[var(--card-background)]"
       >
         <div className="flex flex-col gap-1 w-full md:min-w-md">
           <form onSubmit={handleSubmit(onSubmit)}>
