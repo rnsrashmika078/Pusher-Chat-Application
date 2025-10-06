@@ -2,6 +2,7 @@
 import {
   setActiveTab,
   setChatWith,
+  setGroupChat,
   setStartChat,
 } from "@/src/redux/chatSlicer";
 import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
@@ -13,28 +14,35 @@ import { Conversation, User } from "@/interface/Types";
 import SearchArea from "@/src/lib/Components/Basic/SearchArea";
 import { JSX, useEffect, useRef, useState } from "react";
 import { useDebounce } from "@/src/hooks/useDebounce";
-import ShowNotification from "./Notification/ShowNotification";
 import { useSession } from "next-auth/react";
+import Button from "@/src/lib/Components/Basic/Button";
+import CreateGroup from "../modals/CreateGroup";
+import { getAllGroups } from "@/src/server_side/actions/GroupChats";
+import { Groups } from "@/src/types";
+import ChatCard from "./Cards/ChatCard";
+import GroupCard from "./Cards/GroupCard";
 
 interface ChatListLayoutProps {
   allUsers?: User[];
   toggle: boolean;
   isLoading: boolean;
   chats: Conversation[];
+  groups: Groups[];
 }
 const ChatListPanel: React.FC<ChatListLayoutProps> = ({
   toggle,
   isLoading,
   allUsers,
   chats,
+  groups,
 }) => {
   const { data: session } = useSession();
   const activeTab = useSelector((store: ReduxtState) => store.chat.activeTab);
   const [mainTab, setMainTab] = useState<string>("Message");
-
   const dispatch = useDispatch<ReduxDispatch>();
   const [serachTerm, setSearchTerm] = useState<string>("");
   const searchRef = useRef<HTMLInputElement>(null);
+  const [visibility, setVisibility] = useState<boolean>(false);
 
   const handleSearch = useDebounce(
     (value: string) => setSearchTerm(value),
@@ -59,16 +67,6 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
     // </div>,
   ];
 
-  const lastMessages = useSelector(
-    (store: ReduxtState) => store.chat.lastMessage
-  );
-  type MessageStatus = "sent" | "delivered" | "seen";
-
-  const status: Record<MessageStatus, JSX.Element> = {
-    sent: <IoCheckmarkDoneSharp />,
-    delivered: <IoCheckmarkDoneSharp />,
-    seen: <IoCheckmarkDoneSharp color="blue" />,
-  };
   const [unseenCount, setUnseenCount] = useState<
     {
       id: string;
@@ -118,7 +116,9 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
               <span
                 key={tabNames[index]}
                 className={`cursor-pointer p-2 ${
-                  mainTab === tabNames[index] ? "bg-[var(--active-tab-color)]" : ""
+                  mainTab === tabNames[index]
+                    ? "bg-[var(--active-tab-color)]"
+                    : ""
                 }`}
                 onClick={() => setMainTab(tabNames[index])}
               >
@@ -181,82 +181,36 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
               </div>
             </>
           </div>
-          {mainTab === "FriendRequest" && <ShowNotification />}
-
+          {/* {mainTab === "FriendRequest" && <ShowNotification />} */}
           {/* friends chat inboxes */}
-          {activeTab !== "Settings" && mainTab === "Message" ? (
-            <div className="relative p-5">
-              {!isLoading ? (
-                chats &&
-                chats?.map((friend: Conversation, index: number) => (
-                  <div
-                    key={index}
-                    className="flex gap-3 mt-2 bg-[var(--card-background)] p-3 rounded-2xl shadow-sm"
-                    onClick={() => {
-                      alert(friend.conversationId);
-                      dispatch(
-                        setStartChat({
-                          id: friend.conversationId!,
-                          firstName: friend.otherUserFname!,
-                          lastName: friend.otherUserLName!,
-                          recieverId: friend.otherUserId,
-                        })
-                      );
-                      dispatch(setChatWith(null));
-                    }}
-                  >
-                    <Image
-                      src="https://randomuser.me/api/portraits/men/27.jpg"
-                      alt="Reviewer"
-                      width={10}
-                      height={10}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div className="w-full">
-                      <div className="flex justify-between items-center ">
-                        <h1 className="font-bold">
-                          {friend.otherUserFname + " " + friend.otherUserLName}
-                        </h1>
-                        <p className="text-xs text-gray-400 ">
-                          {/* {friend.recievedtime} */}
-                        </p>
-                      </div>
-                      <div className="flex justify-between items-center ">
-                        <div className="flex justify-center items-center gap-1">
-                          <p>{status[friend.status as MessageStatus]}</p>
-                          {/* whitespace-nowrap overflow-hidden text-ellipsis */}
-                          <p className="text-sm text-gray-400">
-                            {lastMessages[friend.conversationId] ||
-                              friend.lastMessage ||
-                              "No messages yet"}
-                          </p>
-                        </div>
-                        {(() => {
-                          const unseen = unseenCount.find(
-                            (u) => u.id === friend.otherUserId
-                          );
-
-                          if (unseen && unseen.id !== session?.user?._id) {
-                            return (
-                              <span
-                                className={`flex justify-center items-center text-[var(--background)] text-sm bg-green-500 w-5 h-5 p-2 rounded-full`}
-                              >
-                                {step === 0 ? unseen.count - 1 : unseen.count}
-                              </span>
-                            );
-                          }
-                          return null;
-                        })()}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="absolute left-1/2 top-5 animate-spin">
-                  <RiLoader2Fill size={25} />
+          {activeTab === "Inbox" ? (
+            // this is for chat card
+            <ChatCard
+              chats={chats}
+              isLoading={isLoading}
+              unseenCount={unseenCount}
+              step={step}
+            />
+          ) : activeTab === "Groups" ? (
+            <>
+              <div className="p-5">
+                <div className="relative flex justify-start">
+                  <Button
+                    name="Create new Group"
+                    radius="xl"
+                    onClick={() => setVisibility(true)}
+                  />
                 </div>
-              )}
-            </div>
+                {visibility && (
+                  <CreateGroup setVisibility={setVisibility} friends={chats} />
+                )}
+                <GroupCard
+                    groups={groups}
+                    isLoading={isLoading}
+                    unseenCount={[]}
+                    step={0} status={undefined} lastMessages={undefined}                />
+              </div>
+            </>
           ) : null}
         </div>
       )}

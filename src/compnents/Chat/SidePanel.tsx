@@ -8,7 +8,7 @@ import { GrSchedulePlay } from "react-icons/gr";
 import { HiOutlineInboxArrowDown } from "react-icons/hi2";
 import { IoIosSettings } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
-import AddFriend from "../AddFriend/AddFriend";
+import AddFriend from "../modals/AddFriend";
 import { User } from "@/interface/Types";
 interface SideProps {
   allUsers: User[];

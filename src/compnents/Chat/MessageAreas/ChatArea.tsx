@@ -25,15 +25,18 @@ import { setLastMessage } from "@/src/redux/chatSlicer";
 import { getLastSeen } from "@/src/server_side/actions/UserLastSeenServerAction";
 import { useInView } from "framer-motion";
 import { RiLoader2Fill } from "react-icons/ri";
+import { start } from "repl";
 
 interface MessageProps {
-  useFor: "AI" | "Chat";
-  mutateChats: KeyedMutator<
+  useFor: "Group" | "Chat";
+  mutate: KeyedMutator<
     { data: unknown; error?: undefined } | { data: never[]; error: unknown }
   >;
 }
 
-const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
+//@ts
+
+const ChatArea = ({ useFor, mutate }: MessageProps) => {
   const viewRef = useRef<HTMLDivElement | null>(null);
   const isInView = useInView(viewRef, {
     // rootMargin: "-10% 0px -10% 0px",
@@ -45,6 +48,7 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
     (store: ReduxtState) => store.chat.liveMessages
   );
   const startChat = useSelector((store: ReduxtState) => store.chat.startChat);
+
   const onlineUsers = useSelector(
     (store: ReduxtState) => store.chat.onlineUsers
   );
@@ -164,7 +168,7 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
     });
     const result = await AddFriendServerAction(formdata);
     if (result) {
-      mutateChats();
+      mutate();
     } else {
     }
   }
@@ -187,7 +191,6 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
         }
       }
     };
-
     handleUpdateLastSeen();
   }, [onlineUsers, startChat?.recieverId, session?.user._id]);
 
@@ -198,12 +201,13 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
     );
     setIsSeen(false);
     if ((currentChat || startChat) && session) {
+      const date = new Date();
       const userMessage: Chat = {
         conversationId: startChat?.id ?? currentChat?.id ?? "",
         senderId: session?.user._id ?? "",
         recieverId: startChat?.recieverId ?? currentChat?.recieverId ?? "",
         message: typeMessage ?? "",
-        createdAt: new Date(),
+        createdAt: date,
         status: isOnline ? "delivered" : "sent",
       };
       setMessages((prev) => [...prev, userMessage]);
@@ -256,7 +260,6 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
                 messageId: lastMessage.recieverId,
               }),
             });
-
             setIsSeen(true);
           } catch (error) {
             console.error("Error sending seen notification:", error);
@@ -290,26 +293,29 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
     seen: <IoCheckmarkDoneSharp color="blue" />,
   };
 
+  console.log(startChat?.firstName);
+  console.log(startChat?.lastName);
+
   return (
     <div className="flex flex-col w-full h-full select-none">
       {/* Header */}
       <div className="  top-0 flex justify-between items-center p-5 py-6 shadow-xs bg-[var(--background)] border-b border-[var(--border)] sticky  z-10">
         <div className="flex gap-3 items-center">
-          {useFor === "Chat" && (
-            <Image
-              src="https://randomuser.me/api/portraits/men/27.jpg"
-              alt="Reviewer"
-              width={40}
-              height={40}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-          )}
+          <Image
+            src="https://randomuser.me/api/portraits/men/27.jpg"
+            alt="Reviewer"
+            width={40}
+            height={40}
+            className="w-10 h-10 rounded-full object-cover"
+          />
           {useFor === "Chat" ? (
             <div className="">
               <h1 className="font-bold">
-                {(chat.chatWith?.firstname ?? startChat?.firstName) +
-                  " " +
-                  (chat.chatWith?.lastname ?? startChat?.lastName)}
+                {/* {chat.chatWith?.firstname ??
+                  startChat?.firstName ??
+                  +" " + (chat.chatWith?.lastname ?? startChat?.lastName ?? "")} */}
+                {startChat?.firstName || chat.chatWith?.firstname}{" "}
+                {startChat?.lastName || chat.chatWith?.lastname}
               </h1>
               <p className="text-sm text-gray-400">
                 {checkOnline
@@ -336,27 +342,19 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
                   : "Offline"}
               </p>
             </div>
-          ) : (
-            <div>
-              {/* <h1 className="font-bold">{aiChat?.title}</h1> */}
-              {/* <p className="text-sm text-gray-400">Last seen 3 hours ago</p> */}
-            </div>
-          )}
+          ) : null}
         </div>
-
-        {useFor === "Chat" && (
-          <div className="flex gap-5 text-sm text-gray-500">
-            <span>
-              <IoCall size={25} color="gray" />
-            </span>
-            <span>
-              <FaVideo size={25} color="gray" />
-            </span>
-            <span>
-              <IoMdMore size={25} color="gray" />
-            </span>
-          </div>
-        )}
+        <div className="flex gap-5 text-sm text-gray-500">
+          <span>
+            <IoCall size={25} color="gray" />
+          </span>
+          <span>
+            <FaVideo size={25} color="gray" />
+          </span>
+          <span>
+            <IoMdMore size={25} color="gray" />
+          </span>
+        </div>
       </div>
 
       {/* Messages */}
@@ -456,4 +454,4 @@ const MessageArea = ({ useFor, mutateChats }: MessageProps) => {
   );
 };
 
-export default MessageArea;
+export default ChatArea;

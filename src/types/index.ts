@@ -12,15 +12,6 @@ export interface User {
   coverImage?: string | null;
   token?: string;
 }
-export interface EmailType {
-  _id: string;
-  from: string;
-  to: string;
-  header: string;
-  body: string;
-  html: string;
-  subject: string;
-}
 
 export interface IContent {
   from: string;
@@ -31,27 +22,28 @@ export interface IContent {
   html?: string;
 }
 
-export interface Product {
-  _id: string;
-  name: string;
-  price: number;
-  color: string;
-  model: string;
-  category: string;
-  images: ImgProperty[];
-  stock: number;
-  createdAt: string;
-}
-
 export interface LoadBody {
   loading: boolean;
   type: string;
 }
 
-export interface News {
-  id: number;
-  date: string;
-  heading: string;
-  content: string;
-  category: string;
+interface GroupMember {
+  userId: string;
+  firstName: string;
+  lastName: string;
 }
+interface Message {
+  senderId: string;
+  message: string;
+  status: "delivered";
+  createdAt: Date;
+}
+export interface Groups {
+  _id: string;
+  groupName: string;
+  createdby: string;
+  groupMembers: GroupMember[];
+  message: Message[];
+  avatar?: string;
+}
+export type MessageStatus = "sent" | "delivered" | "seen";

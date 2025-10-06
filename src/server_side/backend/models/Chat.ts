@@ -22,7 +22,7 @@ const ChatSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // ✅ this should be the *second argument*
+    timestamps: true, 
   }
 );
 

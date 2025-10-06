@@ -2,6 +2,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Chat, Friend, Member, StartChat } from "@/interface/Types";
 import { Channel } from "pusher-js";
+import { Groups } from "../types";
 
 type LastMessageState = {
   [conversationId: string]: string;
@@ -25,11 +26,13 @@ interface PostState {
   chatWith: Friend | null;
   onlineUsers: Member[];
   pusherChannel: Channel | null;
+  groupChat: Groups | null;
 }
 
 const initialState: PostState = {
   ws: null,
   chatWith: null,
+  groupChat: null,
   activeTab: "Inbox",
   settingsActiveTab: "General",
   liveMessages: [],
@@ -47,6 +50,9 @@ const chatSlicer = createSlice({
   reducers: {
     setStartChat: (state, action: PayloadAction<StartChat | null>) => {
       state.startChat = action.payload;
+    },
+    setGroupChat: (state, action: PayloadAction<Groups | null>) => {
+      state.groupChat = action.payload;
     },
     setChatWith: (state, action: PayloadAction<Friend | null>) => {
       state.chatWith = action.payload;
@@ -107,6 +113,7 @@ const chatSlicer = createSlice({
 
 export const {
   setStartChat,
+  setGroupChat,
   setWebSocket,
   setActiveTab,
   setSettingsActiveTab,

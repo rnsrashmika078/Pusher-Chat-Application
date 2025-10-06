@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { BiDockLeft } from "react-icons/bi";
 import { useSelector } from "react-redux";
 import { ReduxtState } from "@/src/redux/store";
-import MessageArea from "./MessageArea";
 import SidePanel from "./SidePanel";
 import ChatListPanel from "./ChatListPanel";
 import { useSession } from "next-auth/react";
@@ -12,6 +11,10 @@ import { User } from "@/interface/Types";
 import PusherListenerPresence from "./Presence/PusherListenerPresence";
 import useSWR from "swr";
 import { getChats } from "@/src/server_side/actions/ChatHistoryServerAction";
+import { getAllGroups } from "@/src/server_side/actions/GroupChats";
+
+import ChatArea from "./MessageAreas/ChatArea";
+import GroupChatArea from "./MessageAreas/GroupChatArea";
 
 interface LayoutProps {
   allUsers: User[];
@@ -19,11 +22,11 @@ interface LayoutProps {
 const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
   const { data: session } = useSession();
   const [width, setWidth] = useState(0);
-
   const [toggle, setToggle] = useState<boolean>(false);
   const startChat = useSelector((store: ReduxtState) => store.chat.startChat);
   const chatWith = useSelector((store: ReduxtState) => store.chat.chatWith);
   const activeTab = useSelector((store: ReduxtState) => store.chat.activeTab);
+  const groupChat = useSelector((store: ReduxtState) => store.chat.groupChat);
   // const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -59,7 +62,7 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
   useEffect(() => {
     if (!liveMessages[liveMessages.length - 1]?.saved) {
       setSaved(false);
-      mutate();
+      mutateChats();
     } else {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -72,15 +75,42 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
         liveMessages[liveMessages.length - 1]?.conversationId,
       ];
 
+  //get Chats
   const {
     data: chats,
-    mutate,
-    isLoading,
+    mutate: mutateChats,
+    isLoading: chatLoading,
   } = useSWR(field, getChats, {
     // revalidateOnFocus: true, // refetch when window/tab gets focus
     // revalidateOnReconnect: true,
     // shouldRetryOnError: true,
   });
+
+  //get groups
+
+  const {
+    data: groups,
+    mutate: mutateGroups,
+    isLoading: groupsLoading,
+  } = useSWR(session?.user._id, getAllGroups, {
+    // revalidateOnFocus: true, // refetch when window/tab gets focus
+    // revalidateOnReconnect: true,
+    // shouldRetryOnError: true,
+  });
+
+  // retrives chats
+
+  // const [groups, setGroups] = useState<Groups[]>([]);
+  // useEffect(() => {
+  //   if (activeTab !== "Groups") return;
+  //   const fetchGroups = async () => {
+  //     const res = await getAllGroups(session?.user._id as string);
+  //     if (res.success) {
+  //       setGroups(res.data);
+  //     }
+  //   };
+  //   fetchGroups();
+  // }, [activeTab, session?.user._id]);
 
   return (
     <div className="bg-[var(--panel-bg-color)] flex h-[calc(100vh-4rem)] overflow-hidden border-2 border-t-[var(--border)]  ">
@@ -104,12 +134,12 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
             <ChatListPanel
               toggle={toggle}
               allUsers={allUsers}
-              isLoading={isLoading}
+              isLoading={chatLoading || groupsLoading}
               chats={chats?.data ?? []}
+              groups={groups?.data ?? []}
             />
           </div>
         )}
-
         <div
           className={`w-8 h-8  bg-black left-2 text-white rounded-full fixed flex justify-center items-center shadow-2xl lg:hidden bottom-2 transition-all duration-300 ease-out opacity-25 hover:opacity-100 ${
             toggle ? "" : ""
@@ -127,9 +157,11 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
               toggle ? "flex-1" : "flex-2"
             } h-[calc(100vh-4rem)]  overflow-y-auto w-full`}
           >
-            {/* && !activeTab */}
             {startChat || chatWith ? (
-              <MessageArea useFor="Chat" mutateChats={mutate} />
+              <ChatArea useFor="Chat" mutate={mutateChats} />
+            ) : groupChat ? (
+              // @ts-expect-error:mutate function shape mismatch error
+              <GroupChatArea useFor="Group" mutate={mutateGroups} />
             ) : (
               <div className="text-2xl flex justify-center items-center m-auto">
                 Chat With your Friend
