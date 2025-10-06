@@ -1,23 +1,19 @@
 "use client";
 import {
   setActiveTab,
-  setChatWith,
-  setGroupChat,
-  setStartChat,
 } from "@/src/redux/chatSlicer";
 import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
-import { IoCall, IoCheckmarkDoneSharp } from "react-icons/io5";
-import { RiChat2Fill, RiLoader2Fill } from "react-icons/ri";
+import { IoCall } from "react-icons/io5";
+import { RiChat2Fill} from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import { Conversation, User } from "@/interface/Types";
 import SearchArea from "@/src/lib/Components/Basic/SearchArea";
-import { JSX, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDebounce } from "@/src/hooks/useDebounce";
 import { useSession } from "next-auth/react";
 import Button from "@/src/lib/Components/Basic/Button";
 import CreateGroup from "../modals/CreateGroup";
-import { getAllGroups } from "@/src/server_side/actions/GroupChats";
 import { Groups } from "@/src/types";
 import ChatCard from "./Cards/ChatCard";
 import GroupCard from "./Cards/GroupCard";
@@ -205,10 +201,13 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
                   <CreateGroup setVisibility={setVisibility} friends={chats} />
                 )}
                 <GroupCard
-                    groups={groups}
-                    isLoading={isLoading}
-                    unseenCount={[]}
-                    step={0} status={undefined} lastMessages={undefined}                />
+                  groups={groups}
+                  isLoading={isLoading}
+                  unseenCount={[]}
+                  step={0}
+                  status={undefined}
+                  lastMessages={undefined}
+                />
               </div>
             </>
           ) : null}

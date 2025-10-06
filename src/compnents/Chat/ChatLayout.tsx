@@ -47,12 +47,12 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
 
   useEffect(() => {
     const runEffect = async () => {
-      if ((chatWith || startChat) && width < 768) {
+      if ((chatWith || startChat || groupChat) && width < 768) {
         setToggle((prev) => !prev);
       }
     };
     runEffect();
-  }, [chatWith, startChat, width]);
+  }, [chatWith, startChat, width, groupChat]);
 
   const liveMessages = useSelector(
     (store: ReduxtState) => store.chat.liveMessages
@@ -161,7 +161,7 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
               <ChatArea useFor="Chat" mutate={mutateChats} />
             ) : groupChat ? (
               // @ts-expect-error:mutate function shape mismatch error
-              <GroupChatArea useFor="Group" mutate={mutateGroups} />
+              <GroupChatArea chats={chats} useFor="Group" mutate={mutateGroups} />
             ) : (
               <div className="text-2xl flex justify-center items-center m-auto">
                 Chat With your Friend

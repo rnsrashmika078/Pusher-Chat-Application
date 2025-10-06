@@ -11,7 +11,7 @@ import { FaVideo } from "react-icons/fa";
 import { AddFriendServerAction } from "@/src/server_side/actions/FriendServerAction";
 import { KeyedMutator } from "swr";
 import { useSession } from "next-auth/react";
-import { Chat, StartChat } from "@/interface/Types";
+import { Chat, Conversation, StartChat } from "@/interface/Types";
 import {
   getChatHistory,
   updateMessageStatus,
@@ -25,17 +25,18 @@ import { setLastMessage } from "@/src/redux/chatSlicer";
 import { getLastSeen } from "@/src/server_side/actions/UserLastSeenServerAction";
 import { useInView } from "framer-motion";
 import { RiLoader2Fill } from "react-icons/ri";
+import Dropdown from "@/src/lib/Components/Basic/Dropdown";
+import AddFriendsToGroup from "../../modals/AddFriendsToGroup";
 
 interface MessageProps {
   useFor?: "Group" | "Chat";
+  chats: Conversation[];
   mutate: KeyedMutator<
     { data: unknown; error?: undefined } | { data: never[]; error: unknown }
   >;
 }
 
-//@ts
-
-const GroupChatArea = ({ mutate }: MessageProps) => {
+const GroupChatArea = ({ mutate, chats }: MessageProps) => {
   const viewRef = useRef<HTMLDivElement | null>(null);
   const isInView = useInView(viewRef, {
     // rootMargin: "-10% 0px -10% 0px",
@@ -168,7 +169,7 @@ const GroupChatArea = ({ mutate }: MessageProps) => {
     });
     const result = await AddFriendServerAction(formdata);
     if (result) {
-        mutate();
+      mutate();
     } else {
     }
   }
@@ -293,6 +294,9 @@ const GroupChatArea = ({ mutate }: MessageProps) => {
     seen: <IoCheckmarkDoneSharp color="blue" />,
   };
 
+  const [toggle, setToggle] = useState<boolean>(false);
+  const [selection, setSelection] = useState<string>("");
+
   return (
     <div className="flex flex-col w-full h-full select-none">
       {/* Header */}
@@ -333,7 +337,7 @@ const GroupChatArea = ({ mutate }: MessageProps) => {
             </p>
           </div>
         </div>
-        <div className="flex gap-5 text-sm text-gray-500">
+        <div className="relative flex gap-5 text-sm text-gray-500">
           <span>
             <IoCall size={25} color="gray" />
           </span>
@@ -341,8 +345,22 @@ const GroupChatArea = ({ mutate }: MessageProps) => {
             <FaVideo size={25} color="gray" />
           </span>
           <span>
-            <IoMdMore size={25} color="gray" />
+            <IoMdMore
+              size={25}
+              color="gray"
+              onClick={() => setToggle(!toggle)}
+            />
           </span>
+          {toggle && (
+            <span className="absolute top-8 right-0">
+              <Dropdown
+                options={["Group settings", "Add friends"]}
+                setSelection={setSelection}
+                selection={selection}
+              />
+            </span>
+          )}
+          {selection === "add friends" && <AddFriendsToGroup friends={chats} />}
         </div>
       </div>
 
@@ -354,18 +372,18 @@ const GroupChatArea = ({ mutate }: MessageProps) => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-gray-400 mb-3 flex-col inset-0">
               <div className="flex flex-col justify-center items-center">
                 <span className="text-xl font-semibold text-gray-800">
-                  Welcome to the Chat!
+                  Welcome to the Group Chat!
                 </span>
                 <span className="text-sm text-gray-600 mt-2">
-                  You’re all set to start a conversation.
+                  You’re all set to start a group conversation.
                 </span>
                 <span className="text-sm text-gray-600"></span>
                 <div className="flex justify-center items-center gap-4 mt-6">
-                  <Button
+                  {/* <Button
                     name="Let's Get Chatting"
                     onClick={handleAddFriend}
                     className="bg-blue-600 text-white hover:bg-blue-700"
-                  ></Button>
+                  ></Button> */}
                 </div>
               </div>
             </div>
