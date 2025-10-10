@@ -1,4 +1,5 @@
 "use server";
+import { GroupMembers } from "@/src/types";
 import connectDB from "../backend/lib/connectDB";
 import Group from "../backend/models/Group";
 import Message from "../backend/models/Message";
@@ -64,6 +65,52 @@ export async function createGroup(formData: FormData) {
     };
   }
 }
+
+export async function addFriendToGroup(friend: GroupMembers, groupId: string) {
+  try {
+    await connectDB();
+
+    // 1️⃣ Find the group first
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return {
+        success: false,
+        message: "Group not found",
+        data: null,
+      };
+    }
+
+    const alreadyMember = group.groupMembers.some(
+      (member: GroupMembers) => member.userId === friend.userId
+    );
+
+    if (alreadyMember) {
+      return {
+        success: false,
+        message: "User is already a member of this group",
+        data: JSON.parse(JSON.stringify(alreadyMember)),
+      };
+    }
+
+    // 3️⃣ Add new friend if not in group
+    group.groupMembers.push(friend);
+    const updatedGroup = await group.save();
+
+    return {
+      success: true,
+      message: "Friend added successfully",
+      data: JSON.parse(JSON.stringify(updatedGroup)),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Error adding friend",
+      data: [],
+      error,
+    };
+  }
+}
+
 export async function updateMessageStatus(
   convoId: string,
   status: "sent" | "delivered" | "seen"

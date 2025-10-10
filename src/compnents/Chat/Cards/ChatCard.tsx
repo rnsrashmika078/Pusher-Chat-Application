@@ -8,13 +8,12 @@ import { RiLoader2Fill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 interface ChatListProps {
-  chats?: Conversation[];
   isLoading: boolean;
   unseenCount?: { id: string; user: string; count: number }[];
   step?: number;
 }
 const ChatCard: React.FC<ChatListProps> = ({
-  chats,
+
   isLoading,
   unseenCount,
   step,
@@ -24,6 +23,7 @@ const ChatCard: React.FC<ChatListProps> = ({
   const lastMessages = useSelector(
     (store: ReduxtState) => store.chat.lastMessage
   );
+  const friends = useSelector((store: ReduxtState) => store.chat.friends);
 
   type MessageStatus = "sent" | "delivered" | "seen";
 
@@ -43,7 +43,7 @@ const ChatCard: React.FC<ChatListProps> = ({
 
   return (
     <div className="relative p-5">
-      {chats?.map((friend: Conversation, index: number) => (
+      {friends?.map((friend: Conversation, index: number) => (
         <div
           key={index}
           className="flex gap-3 mt-2 bg-[var(--card-background)] p-3 rounded-2xl shadow-sm"

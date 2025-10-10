@@ -42,9 +42,6 @@ export async function POST(req: Request) {
       lastMessage,
       status,
     });
-
-    await newMessage.save();
-    // 4️⃣ Trigger Pusher for real-time updates
     await pusher.trigger(`presence-user-${recieverId}`, "chat-history", {
       conversationId,
       senderId,
@@ -55,6 +52,7 @@ export async function POST(req: Request) {
       saved,
       createdAt,
     });
+    await newMessage.save();
 
     return NextResponse.json({ status: "ok" });
   } catch (error) {

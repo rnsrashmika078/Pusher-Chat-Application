@@ -1,10 +1,8 @@
 "use client";
-import {
-  setActiveTab,
-} from "@/src/redux/chatSlicer";
+import { setActiveTab } from "@/src/redux/chatSlicer";
 import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
 import { IoCall } from "react-icons/io5";
-import { RiChat2Fill} from "react-icons/ri";
+import { RiChat2Fill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import { Conversation, User } from "@/interface/Types";
@@ -22,18 +20,17 @@ interface ChatListLayoutProps {
   allUsers?: User[];
   toggle: boolean;
   isLoading: boolean;
-  chats: Conversation[];
   groups: Groups[];
 }
 const ChatListPanel: React.FC<ChatListLayoutProps> = ({
   toggle,
   isLoading,
   allUsers,
-  chats,
   groups,
 }) => {
   const { data: session } = useSession();
   const activeTab = useSelector((store: ReduxtState) => store.chat.activeTab);
+  const friends = useSelector((store: ReduxtState) => store.chat.friends);
   const [mainTab, setMainTab] = useState<string>("Message");
   const dispatch = useDispatch<ReduxDispatch>();
   const [serachTerm, setSearchTerm] = useState<string>("");
@@ -73,7 +70,7 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
   const [step, setStep] = useState<number>(0);
 
   useEffect(() => {
-    chats.map((ch) => {
+    friends.map((ch) => {
       setStep(step + 1);
       if (ch?.status === "seen") {
         setUnseenCount((prev) =>
@@ -101,7 +98,7 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chats]);
+  }, [friends]);
 
   return (
     <div className="relative w-full select-none border-r  border-[var(--border)] ">
@@ -182,7 +179,6 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
           {activeTab === "Inbox" ? (
             // this is for chat card
             <ChatCard
-              chats={chats}
               isLoading={isLoading}
               unseenCount={unseenCount}
               step={step}
@@ -194,12 +190,11 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
                   <Button
                     name="Create new Group"
                     radius="xl"
+                    className="bg-gradient-animated-version"
                     onClick={() => setVisibility(true)}
                   />
                 </div>
-                {visibility && (
-                  <CreateGroup setVisibility={setVisibility} friends={chats} />
-                )}
+                {visibility && <CreateGroup setVisibility={setVisibility} />}
                 <GroupCard
                   groups={groups}
                   isLoading={isLoading}

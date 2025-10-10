@@ -1,6 +1,6 @@
 "use client";
-import { Conversation } from "@/interface/Types";
 import { setSimpleNotification } from "@/src/redux/NotifySlicer";
+import { ReduxtState } from "@/src/redux/store";
 import {
   createGroup,
 } from "@/src/server_side/actions/GroupChats";
@@ -8,15 +8,14 @@ import { Groups } from "@/src/types";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 import { RxCross1 } from "react-icons/rx";
+import { useSelector } from "react-redux";
 
 interface CreateGroupProps {
   setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
-  friends: Conversation[];
 }
 
 const CreateGroup: React.FC<CreateGroupProps> = ({
   setVisibility,
-  friends,
 }) => {
   type SelectedFriend = {
     userId: string;
@@ -25,6 +24,7 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
   };
   const { data: session } = useSession();
   const [groupName, setGroupName] = useState("");
+  const friends = useSelector((store: ReduxtState) => store.chat.friends);
   const [selectedFriends, setSelectedFriends] = useState<SelectedFriend[]>([]);
   const [groups, setGroups] = useState<Groups[]>([]);
   const handleFriendSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {

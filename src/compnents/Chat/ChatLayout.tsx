@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { BiDockLeft } from "react-icons/bi";
-import { useSelector } from "react-redux";
-import { ReduxtState } from "@/src/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
 import SidePanel from "./SidePanel";
 import ChatListPanel from "./ChatListPanel";
 import { useSession } from "next-auth/react";
@@ -15,6 +15,8 @@ import { getAllGroups } from "@/src/server_side/actions/GroupChats";
 
 import ChatArea from "./MessageAreas/ChatArea";
 import GroupChatArea from "./MessageAreas/GroupChatArea";
+import { setFriends } from "@/src/redux/chatSlicer";
+import PusherPresenceGroup from "./Presence/PusherPresenceGroup";
 
 interface LayoutProps {
   allUsers: User[];
@@ -27,6 +29,8 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
   const chatWith = useSelector((store: ReduxtState) => store.chat.chatWith);
   const activeTab = useSelector((store: ReduxtState) => store.chat.activeTab);
   const groupChat = useSelector((store: ReduxtState) => store.chat.groupChat);
+  const dispatch = useDispatch<ReduxDispatch>();
+
   // const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -88,6 +92,10 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
 
   //get groups
 
+  useEffect(() => {
+    dispatch(setFriends(chats?.data ?? []));
+  }, [chats?.data, dispatch]);
+
   const {
     data: groups,
     mutate: mutateGroups,
@@ -115,6 +123,7 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
   return (
     <div className="bg-[var(--panel-bg-color)] flex h-[calc(100vh-4rem)] overflow-hidden border-2 border-t-[var(--border)]  ">
       <div className="flex flex-1 overflow-hidden">
+        <PusherPresenceGroup user_id={session?.user._id} />
         <PusherListenerPresence user_id={session?.user._id} />
         <SidePanel allUsers={allUsers} />
         {activeTab === "Settings" ? (
@@ -135,7 +144,6 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
               toggle={toggle}
               allUsers={allUsers}
               isLoading={chatLoading || groupsLoading}
-              chats={chats?.data ?? []}
               groups={groups?.data ?? []}
             />
           </div>
@@ -151,6 +159,7 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
             onClick={() => setToggle((prev) => !prev)}
           />
         </div>
+
         {activeTab !== "Settings" && (
           <div
             className={`bg-[var(--panel-bg-color)] flex ${
@@ -160,8 +169,11 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
             {startChat || chatWith ? (
               <ChatArea useFor="Chat" mutate={mutateChats} />
             ) : groupChat ? (
-              // @ts-expect-error:mutate function shape mismatch error
-              <GroupChatArea chats={chats} useFor="Group" mutate={mutateGroups} />
+              <GroupChatArea
+                useFor="Group"
+                // @ts-expect-error:mutate function shape mismatch error
+                mutate={mutateGroups}
+              />
             ) : (
               <div className="text-2xl flex justify-center items-center m-auto">
                 Chat With your Friend

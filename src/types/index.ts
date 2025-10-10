@@ -32,8 +32,12 @@ interface GroupMember {
   firstName: string;
   lastName: string;
 }
-interface Message {
+export interface GroupMessage {
+  _id: string;
+  groupId: string;
   senderId: string;
+  firstName: string;
+  lastName: string;
   message: string;
   status: "delivered";
   createdAt: Date;
@@ -43,7 +47,11 @@ export interface Groups {
   groupName: string;
   createdby: string;
   groupMembers: GroupMember[];
-  message: Message[];
   avatar?: string;
+}
+export interface GroupMembers {
+  userId: string;
+  firstName: string;
+  lastName: string;
 }
 export type MessageStatus = "sent" | "delivered" | "seen";

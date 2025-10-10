@@ -1,8 +1,14 @@
 "use client";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Chat, Friend, Member, StartChat } from "@/interface/Types";
+import {
+  Chat,
+  Conversation,
+  Friend,
+  Member,
+  StartChat,
+} from "@/interface/Types";
 import { Channel } from "pusher-js";
-import { Groups } from "../types";
+import { GroupMessage, Groups } from "../types";
 
 type LastMessageState = {
   [conversationId: string]: string;
@@ -12,7 +18,6 @@ type SeenMessage = {
   conversationId: string;
   seen: boolean;
 };
-
 interface PostState {
   ws: WebSocket | null;
   startChat: StartChat | null;
@@ -27,8 +32,9 @@ interface PostState {
   onlineUsers: Member[];
   pusherChannel: Channel | null;
   groupChat: Groups | null;
+  groupLiveMessages: GroupMessage | null;
+  friends: Conversation[];
 }
-
 const initialState: PostState = {
   ws: null,
   chatWith: null,
@@ -42,8 +48,9 @@ const initialState: PostState = {
   onlineUsers: [],
   pusherChannel: null,
   seenMessageStatus: null,
+  groupLiveMessages: null,
+  friends: [],
 };
-
 const chatSlicer = createSlice({
   name: "chatSlicer",
   initialState,
@@ -69,6 +76,12 @@ const chatSlicer = createSlice({
     setLiveMessages: (state, action: PayloadAction<Chat>) => {
       state.liveMessages.push(action.payload);
     },
+    setGroupLiveMessage: (
+      state,
+      action: PayloadAction<GroupMessage | null>
+    ) => {
+      state.groupLiveMessages = action.payload;
+    },
     setSeenMessageStatus: (
       state,
       action: PayloadAction<SeenMessage | null>
@@ -86,6 +99,9 @@ const chatSlicer = createSlice({
       action: PayloadAction<{ conversationId: string; message: string }>
     ) => {
       state.lastMessage[action.payload.conversationId] = action.payload.message;
+    },
+    setFriends: (state, action: PayloadAction<Conversation[]>) => {
+      state.friends = action.payload;
     },
 
     setOnlineUsers: (state, action: PayloadAction<Member[]>) => {
@@ -114,6 +130,7 @@ const chatSlicer = createSlice({
 export const {
   setStartChat,
   setGroupChat,
+  setFriends,
   setWebSocket,
   setActiveTab,
   setSettingsActiveTab,
@@ -127,6 +144,7 @@ export const {
   joinedUser,
   setOnlineUsers,
   leftUser,
+  setGroupLiveMessage,
 } = chatSlicer.actions;
 
 export default chatSlicer.reducer;

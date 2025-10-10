@@ -1,9 +1,8 @@
 interface DropDownProps {
   options: string[];
-  selection: string;
-  setSelection: React.Dispatch<React.SetStateAction<string>>;
+  setSelection: (selection: string) => void;
 }
-const Dropdown = ({ setSelection, options, selection }: DropDownProps) => {
+const Dropdown = ({ setSelection, options }: DropDownProps) => {
   //   const options = ["React", "Next.js", "Laravel", "Express"];
 
   return (

@@ -1,11 +1,12 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useSession } from "next-auth/react";
 import { Groups, MessageStatus } from "@/src/types";
 import { setGroupChat, setStartChat } from "@/src/redux/chatSlicer";
 import { RiLoader2Fill } from "react-icons/ri";
+import { ReduxtState } from "@/src/redux/store";
 
 interface GroupCardProps {
   groups: Groups[];
@@ -25,7 +26,6 @@ const GroupCard: React.FC<GroupCardProps> = ({
   isLoading,
 }) => {
   const dispatch = useDispatch();
-  const { data: session } = useSession();
 
   if (isLoading) {
     return (
@@ -34,6 +34,7 @@ const GroupCard: React.FC<GroupCardProps> = ({
       </div>
     );
   }
+
   return (
     <>
       {groups &&
@@ -64,8 +65,8 @@ const GroupCard: React.FC<GroupCardProps> = ({
                 <div className="flex justify-center items-center gap-1">
                   {/* <p>{status[friend.status as MessageStatus]}</p>*/}
                   <p className="text-sm text-gray-400">
-                    {grp.message[grp.message.length - 1]?.message ||
-                      "No messages yet"}
+                    {/* {grp.message[grp.message.length - 1]?.message || */}
+                    {/* "No messages yet */}
                   </p>
                 </div>
 

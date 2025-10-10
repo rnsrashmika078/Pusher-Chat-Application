@@ -15,34 +15,15 @@ const GroupSchema = new mongoose.Schema(
       required: false,
     },
     groupMembers: [
-      { userId: { type: String, required: true } },
       {
+        userId: { type: String, required: true },
+
         firstName: { type: String, required: true },
-      },
-      { lastName: { type: String, required: true } },
-    ],
-    message: [
-      {
-        senderId: {
-          type: String,
-          required: false,
-        },
-        message: {
-          type: String,
-          required: false,
-        },
-        status: {
-          type: String,
-          enum: ["sent", "delivered", "seen"],
-          default: "sent",
-          required: false,
-        },
-        createdAt: {
-          type: Date,
-          default: Date.now,
-        },
+
+        lastName: { type: String, required: true },
       },
     ],
+  
   },
   {
     timestamps: true,
