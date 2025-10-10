@@ -1,6 +1,6 @@
 {
-  "name": "Pusher-Chat",
-  "version": "0.1.0",
+  "name": "OzMessager",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",

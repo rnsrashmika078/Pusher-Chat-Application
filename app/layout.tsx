@@ -13,6 +13,7 @@ import "./globals.css";
 import ClientProvider from "@/src/redux/ClientProvider";
 import NavBar from "@/src/compnents/NavBar/NavBar";
 import Toast from "@/src/compnents/Notifications/Toast";
+import Version from "@/src/compnents/version/Version";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,6 +60,7 @@ export default function RootLayout({
         style={{ fontFamily: "var(--font-rubik)" }}
       >
         <SpeedInsights />
+        <Version />
         <ClientProvider>
           <NavBar />
           <Toast />
