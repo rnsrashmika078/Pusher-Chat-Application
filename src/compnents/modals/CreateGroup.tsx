@@ -1,9 +1,7 @@
 "use client";
 import { setSimpleNotification } from "@/src/redux/NotifySlicer";
 import { ReduxtState } from "@/src/redux/store";
-import {
-  createGroup,
-} from "@/src/server_side/actions/GroupChats";
+import { createGroup } from "@/src/server_side/actions/GroupChats";
 import { Groups } from "@/src/types";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
@@ -14,19 +12,17 @@ interface CreateGroupProps {
   setVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const CreateGroup: React.FC<CreateGroupProps> = ({
-  setVisibility,
-}) => {
+const CreateGroup: React.FC<CreateGroupProps> = ({ setVisibility }) => {
   type SelectedFriend = {
     userId: string;
     firstName: string;
-    lastNames: string;
+    lastName: string;
   };
   const { data: session } = useSession();
   const [groupName, setGroupName] = useState("");
   const friends = useSelector((store: ReduxtState) => store.chat.friends);
   const [selectedFriends, setSelectedFriends] = useState<SelectedFriend[]>([]);
-  const [groups, setGroups] = useState<Groups[]>([]);
+  const [, setGroups] = useState<Groups[]>([]);
   const handleFriendSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = Array.from(e.target.selectedOptions).map((opt) => {
       const friend = friends.find((f) => String(f.otherUserId) === opt.value);
@@ -36,7 +32,6 @@ const CreateGroup: React.FC<CreateGroupProps> = ({
         lastName: friend?.otherUserLName ?? "",
       };
     });
-    // @ts-ignore
     setSelectedFriends(selected);
   };
 

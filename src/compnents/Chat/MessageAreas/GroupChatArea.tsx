@@ -1,56 +1,28 @@
 "use client";
 import React, { JSX, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { useDispatch, useSelector } from "react-redux";
-import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
-import Button from "@/src/lib/Components/Basic/Button";
+import {  useSelector } from "react-redux";
+import {  ReduxtState } from "@/src/redux/store";
 import { IoCall, IoCheckmarkDoneSharp } from "react-icons/io5";
 import { IoMdMore } from "react-icons/io";
-import { IoSend } from "react-icons/io5";
 import { FaVideo } from "react-icons/fa";
-import { AddFriendServerAction } from "@/src/server_side/actions/FriendServerAction";
-import { KeyedMutator } from "swr";
 import { useSession } from "next-auth/react";
-import { Chat, Conversation, StartChat } from "@/interface/Types";
-import {
-  getChatHistory,
-  updateMessageStatus,
-} from "@/src/server_side/actions/ChatHistoryServerAction";
-import {
-  clearLiveMessages,
-  setSeenMessageStatus,
-  setWholeChat,
-} from "@/src/redux/chatSlicer";
-import { setLastMessage } from "@/src/redux/chatSlicer";
-import { getLastSeen } from "@/src/server_side/actions/UserLastSeenServerAction";
-import { useInView } from "framer-motion";
+
 import { RiLoader2Fill } from "react-icons/ri";
 import Dropdown from "@/src/lib/Components/Basic/Dropdown";
 import AddFriendsToGroup from "../../modals/AddFriendsToGroup";
-import { GroupMessage, Groups } from "@/src/types";
+import { GroupMessage } from "@/src/types";
 import { v4 as uuidv4 } from "uuid";
 import Textarea from "@/src/lib/Components/Intermediate/textarea/Textarea";
 
-interface MessageProps {
-  useFor?: "Group" | "Chat";
-  chats: Conversation[];
-  mutate: KeyedMutator<
-    { data: unknown; error?: undefined } | { data: never[]; error: unknown }
-  >;
-}
-
-const GroupChatArea = ({ mutate, chats }: MessageProps) => {
+const GroupChatArea = () => {
   const viewRef = useRef<HTMLDivElement | null>(null);
-  const isInView = useInView(viewRef, {
-    // rootMargin: "-10% 0px -10% 0px",
-    // once: false,  set to true if you only want to trigger once
-  });
+  // const isInView = useInView(viewRef, {
+  // rootMargin: "-10% 0px -10% 0px",
+  // once: false,  set to true if you only want to trigger once
+  // });
   //Redux Global States
-  const chat = useSelector((store: ReduxtState) => store.chat);
-  const liveMessages = useSelector(
-    (store: ReduxtState) => store.chat.liveMessages
-  );
-  const startChat = useSelector((store: ReduxtState) => store.chat.startChat);
+
   const groupChat = useSelector((store: ReduxtState) => store.chat.groupChat);
   const groupLiveMessages = useSelector(
     (store: ReduxtState) => store.chat.groupLiveMessages
@@ -58,19 +30,9 @@ const GroupChatArea = ({ mutate, chats }: MessageProps) => {
   const onlineUsers = useSelector(
     (store: ReduxtState) => store.chat.onlineUsers
   );
-  const [checkOnline, setCheckOnline] = useState<boolean>(
-    onlineUsers.some((user) => user.id === startChat?.recieverId)
-  );
-  const [currentChat, setCurrentChat] = useState<StartChat | null>(null);
-
-  const seenMessageStatus = useSelector(
-    (store: ReduxtState) => store.chat.seenMessageStatus
-  );
-
-  const [lastSeen, setLastSeen] = useState<Date>();
 
   //React Local States
-  const [typeMessage, setTypeMessage] = useState<string>("");
+
   const [messages, setMessages] = useState<(GroupMessage | null)[]>([]);
 
   //Variables
@@ -78,8 +40,6 @@ const GroupChatArea = ({ mutate, chats }: MessageProps) => {
   // hooks declarations
   const { data: session } = useSession();
 
-  const dispatch = useDispatch<ReduxDispatch>();
-  const [isSeen, setIsSeen] = useState<boolean>(false);
   const [loading, setLoading] = useState<"null" | "send" | "retrive">("null");
 
   // useEffect(() => {
@@ -190,9 +150,6 @@ const GroupChatArea = ({ mutate, chats }: MessageProps) => {
 
   const sendMessage = async (message: string) => {
     setLoading("send");
-    const isOnline = onlineUsers.some(
-      (user) => user.id === startChat?.recieverId
-    );
 
     // _id: string;
     // groupName: string;
@@ -201,7 +158,6 @@ const GroupChatArea = ({ mutate, chats }: MessageProps) => {
     // message: Message[];
     // avatar?: string;
 
-    setIsSeen(false);
     if (groupChat && session) {
       const date = new Date();
       const userMessage: GroupMessage = {
@@ -219,7 +175,6 @@ const GroupChatArea = ({ mutate, chats }: MessageProps) => {
       // status: isOnline ? "delivered" : "sent",
       // updateWholeChatState([userMessage]);
       try {
-        setTypeMessage("");
         const res = await fetch("/api/presence-message-group", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
