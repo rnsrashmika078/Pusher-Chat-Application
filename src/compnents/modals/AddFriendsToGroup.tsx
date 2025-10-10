@@ -2,12 +2,11 @@
 import SearchArea from "@/src/lib/Components/Basic/SearchArea";
 import React, { useState } from "react";
 import Image from "next/image";
-import { useDebounce } from "@/src/hooks/useDebounce";
+// import { useDebounce } from "@/src/hooks/useDebounce";
 import { RxCross1 } from "react-icons/rx";
-import { useSession } from "next-auth/react";
 import Button from "@/src/lib/Components/Basic/Button";
-import { useDispatch, useSelector } from "react-redux";
-import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
+import {  useSelector } from "react-redux";
+import {  ReduxtState } from "@/src/redux/store";
 import { GroupMembers } from "@/src/types";
 import { addFriendToGroup } from "@/src/server_side/actions/GroupChats";
 import { setSimpleNotification } from "@/src/redux/NotifySlicer";
@@ -18,12 +17,8 @@ interface AddFriendsToGroupProps {
 const AddFriendsToGroup: React.FC<AddFriendsToGroupProps> = ({
   setVisibility,
 }) => {
-  const [serachTerm, setSearchTerm] = useState<string>("");
-  const { data: session } = useSession();
-  const handleSearch = useDebounce(
-    (value: string) => setSearchTerm(value),
-    300
-  );
+
+
 
   //   const filteredData = friends?.filter((user: Conversation) => {
   //     if (user._id === session?.user._id) return false; // Exclude current user
@@ -41,7 +36,6 @@ const AddFriendsToGroup: React.FC<AddFriendsToGroupProps> = ({
   //     return user;
   //   });
 
-  const dispatch = useDispatch<ReduxDispatch>();
   return (
     <div className="fixed inset-0 w-full backdrop-blur-sm bg-opacity-40 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-2xl shadow-2xl w-[90%] max-w-md">
@@ -63,7 +57,7 @@ export default AddFriendsToGroup;
 
 const FriendsCard = () => {
   const friends = useSelector((store: ReduxtState) => store.chat.friends);
-  const [addedFriend, setAddedFriend] = useState<GroupMembers[]>([]);
+  const [, setAddedFriend] = useState<GroupMembers[]>([]);
   const groupChat = useSelector((store: ReduxtState) => store.chat.groupChat);
 
   console.log("Friends", friends);

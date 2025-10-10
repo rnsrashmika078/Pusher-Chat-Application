@@ -1,28 +1,19 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import { useDispatch, useSelector } from "react-redux";
-import { useSession } from "next-auth/react";
-import { Groups, MessageStatus } from "@/src/types";
+import { useDispatch } from "react-redux";
+import { Groups} from "@/src/types";
 import { setGroupChat, setStartChat } from "@/src/redux/chatSlicer";
 import { RiLoader2Fill } from "react-icons/ri";
-import { ReduxtState } from "@/src/redux/store";
 
 interface GroupCardProps {
   groups: Groups[];
-  status: Record<MessageStatus, string>;
-  lastMessages: Record<string, string>;
-  unseenCount: { id: string; count: number }[];
   isLoading: boolean;
-  step: number;
+  
 }
 
 const GroupCard: React.FC<GroupCardProps> = ({
   groups,
-  status,
-  lastMessages,
-  unseenCount,
-  step,
   isLoading,
 }) => {
   const dispatch = useDispatch();

@@ -5,7 +5,7 @@ import { IoCall } from "react-icons/io5";
 import { RiChat2Fill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
-import { Conversation, User } from "@/interface/Types";
+import { User } from "@/interface/Types";
 import SearchArea from "@/src/lib/Components/Basic/SearchArea";
 import { useEffect, useRef, useState } from "react";
 import { useDebounce } from "@/src/hooks/useDebounce";
@@ -195,14 +195,7 @@ const ChatListPanel: React.FC<ChatListLayoutProps> = ({
                   />
                 </div>
                 {visibility && <CreateGroup setVisibility={setVisibility} />}
-                <GroupCard
-                  groups={groups}
-                  isLoading={isLoading}
-                  unseenCount={[]}
-                  step={0}
-                  status={undefined}
-                  lastMessages={undefined}
-                />
+                <GroupCard groups={groups} isLoading={isLoading} />
               </div>
             </>
           ) : null}
