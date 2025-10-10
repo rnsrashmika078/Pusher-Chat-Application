@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 import {
   Geist,
   Geist_Mono,
@@ -55,9 +58,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased transition-all`}
         style={{ fontFamily: "var(--font-rubik)" }}
       >
+        <SpeedInsights />
         <ClientProvider>
           <NavBar />
-          <Toast/>
+          <Toast />
           {children}
         </ClientProvider>
       </body>
