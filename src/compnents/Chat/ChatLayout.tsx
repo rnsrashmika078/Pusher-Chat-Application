@@ -170,7 +170,6 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
               <ChatArea useFor="Chat" mutate={mutateChats} />
             ) : groupChat ? (
               <GroupChatArea
-                useFor="Group"
                 // @ts-expect-error:mutate function shape mismatch error
                 mutate={mutateGroups}
               />
