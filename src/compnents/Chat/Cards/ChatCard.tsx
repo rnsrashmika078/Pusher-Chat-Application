@@ -2,8 +2,8 @@ import { Conversation } from "@/interface/Types";
 import { setChatWith, setStartChat } from "@/src/redux/chatSlicer";
 import { ReduxDispatch, ReduxtState } from "@/src/redux/store";
 import { useSession } from "next-auth/react";
-import { JSX } from "react";
-import { IoCheckmarkDoneSharp } from "react-icons/io5";
+// import { JSX } from "react";
+// import { IoCheckmarkDoneSharp } from "react-icons/io5";
 import { RiLoader2Fill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
@@ -15,7 +15,7 @@ interface ChatListProps {
 const ChatCard: React.FC<ChatListProps> = ({
   isLoading,
   unseenCount,
-  step,
+  // step,
 }) => {
   const dispatch = useDispatch<ReduxDispatch>();
   const { data: session } = useSession();
@@ -25,13 +25,13 @@ const ChatCard: React.FC<ChatListProps> = ({
   const friends = useSelector((store: ReduxtState) => store.chat.friends);
   console.log("LAST MESSAGE status of seen", friends[0]?.status);
 
-  type MessageStatus = "sent" | "delivered" | "seen";
+  // type MessageStatus = "sent" | "delivered" | "seen";
 
-  const status: Record<MessageStatus, JSX.Element> = {
-    sent: <IoCheckmarkDoneSharp />,
-    delivered: <IoCheckmarkDoneSharp />,
-    seen: <IoCheckmarkDoneSharp color="blue" />,
-  };
+  // const status: Record<MessageStatus, JSX.Element> = {
+  //   sent: <IoCheckmarkDoneSharp />,
+  //   delivered: <IoCheckmarkDoneSharp />,
+  //   seen: <IoCheckmarkDoneSharp color="blue" />,
+  // };
 
   if (isLoading) {
     return (
@@ -41,8 +41,6 @@ const ChatCard: React.FC<ChatListProps> = ({
     );
   }
 
-  console.log("Friends: ", JSON.stringify(friends));
-  console.log("Live Message: ", JSON.stringify(lastMessages));
 
   return (
     <div className="relative p-5">
