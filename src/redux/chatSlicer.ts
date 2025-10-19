@@ -12,6 +12,7 @@ import { GroupMessage, Groups } from "../types";
 
 type LastMessageState = {
   [conversationId: string]: string;
+  status: string;
 };
 type SeenMessage = {
   messageId: string;
@@ -43,7 +44,7 @@ const initialState: PostState = {
   settingsActiveTab: "General",
   liveMessages: [],
   wholeChat: [],
-  lastMessage: {},
+  lastMessage: { status: "" },
   startChat: null,
   onlineUsers: [],
   pusherChannel: null,
@@ -96,7 +97,11 @@ const chatSlicer = createSlice({
     },
     setLastMessage: (
       state,
-      action: PayloadAction<{ conversationId: string; message: string }>
+      action: PayloadAction<{
+        conversationId: string;
+        message: string;
+        status: string;
+      }>
     ) => {
       state.lastMessage[action.payload.conversationId] = action.payload.message;
     },

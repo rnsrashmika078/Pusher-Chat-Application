@@ -90,10 +90,10 @@ const ChatLayout: React.FC<LayoutProps> = ({ allUsers }) => {
     // shouldRetryOnError: true,
   });
 
-  //get groups
-
+  //get all chats summary
   useEffect(() => {
     dispatch(setFriends(chats?.data ?? []));
+    alert(`ALL CHATS ${JSON.stringify(chats?.data)}`);
   }, [chats?.data, dispatch]);
 
   const {

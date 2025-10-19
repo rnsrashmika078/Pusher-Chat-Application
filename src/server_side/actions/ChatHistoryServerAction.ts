@@ -34,12 +34,12 @@ export async function getChats(senderId: string) {
           conversationId: conv.conversationId,
         })
           .sort({ createdAt: -1 })
-          .select("lastMessage status");
-
+          .select("lastMessage status createdAt");
         return {
           ...conv.toObject(),
           lastMessage: lastMsg?.lastMessage || null,
           status: lastMsg?.status || null,
+          createdAt: lastMsg?.createdAt || null,
         };
       })
     );

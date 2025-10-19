@@ -36,6 +36,10 @@ const ConversationSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    lastMessageSendBy:{
+      type:String,
+      required:false
+    },
     status: {
       type: String,
       enum: ["sent", "delivered", "seen"],

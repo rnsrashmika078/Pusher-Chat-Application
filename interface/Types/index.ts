@@ -49,6 +49,8 @@ export interface Conversation {
   otherUserLName: string;
   lastMessage?: string;
   status?: "sent" | "delivered" | "seen";
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Chat {

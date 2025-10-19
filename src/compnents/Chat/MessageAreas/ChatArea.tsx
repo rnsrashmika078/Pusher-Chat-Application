@@ -76,6 +76,7 @@ const ChatArea = ({ useFor, mutate }: MessageProps) => {
   const [isSeen, setIsSeen] = useState<boolean>(false);
   const [loading, setLoading] = useState<"null" | "send" | "retrive">("null");
 
+  //use for setup the message seen status
   useEffect(() => {
     if (
       isInView &&
@@ -86,6 +87,7 @@ const ChatArea = ({ useFor, mutate }: MessageProps) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInView, messages.length]);
+
   useEffect(() => {
     setLoading("retrive");
     dispatch(clearLiveMessages());
@@ -130,6 +132,7 @@ const ChatArea = ({ useFor, mutate }: MessageProps) => {
           setLastMessage({
             conversationId: last.conversationId,
             message: last.message,
+            status: last.status!,
           })
         );
       }
@@ -291,10 +294,6 @@ const ChatArea = ({ useFor, mutate }: MessageProps) => {
     delivered: <IoCheckmarkDoneSharp />,
     seen: <IoCheckmarkDoneSharp color="blue" />,
   };
-
-  console.log(startChat?.firstName);
-  console.log(startChat?.lastName);
-
   return (
     <div className="flex flex-col w-full h-full select-none">
       {/* Header */}
